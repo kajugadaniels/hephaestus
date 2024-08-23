@@ -32,6 +32,8 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
 
     # Custom apps
+    'account',
+    'home',
 ]
 
 MIDDLEWARE = [
