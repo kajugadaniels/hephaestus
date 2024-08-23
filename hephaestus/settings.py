@@ -30,6 +30,8 @@ INSTALLED_APPS = [
     # Third party
     'django.contrib.humanize',
     'whitenoise.runserver_nostatic',
+
+    # Custom apps
 ]
 
 MIDDLEWARE = [
