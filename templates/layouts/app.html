@@ -28,7 +28,15 @@
 </head>
 <body>
 
-    
+    <div class="page">
+        {% include 'inc/header.html' %}
+
+        {% include 'inc/sidebar.html' %}
+
+        <div class="main-content app-content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
 
     <!-- Scroll To Top -->
     <div class="scrollToTop">
