@@ -145,4 +145,5 @@ WHITENOISE_AUTOREFRESH = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+AUTH_USER_MODEL = 'account.User'
 CSRF_TRUSTED_ORIGINS = ['https://hephaestus.up.railway.app/','https://*.127.0.0.1']
