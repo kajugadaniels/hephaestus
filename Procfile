@@ -1,1 +1,1 @@
-web: gunicorn --timeout 120 hephaestus.wsgi
+web: gunicorn hephaestus.wsgi:application
