@@ -1,1 +1,1 @@
-web: gunicorn hephaestus.wsgi:application
+web: gunicorn 'hephaestus.wsgi'
