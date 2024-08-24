@@ -10,7 +10,7 @@ def dashboard(request):
 @login_required
 def getUsers(request):
     if request.user.role == 'Admin':
-        messages.error(request, "Vous n'êtes pas autorisé à accéder à cette page.")
+        messages.error(request, "You are not authorized to access this page.")
         return redirect('base:dashboard')
 
     getUsers = User.objects.all().order_by('-created_at')
