@@ -65,3 +65,11 @@ def addUser(request):
     }
 
     return render(request, 'pages/users/create.html', context)
+
+@login_required
+def getStudents(request):
+    return render(request, 'pages/students/index.html')
+
+@login_required
+def addStudent(request):
+    return render(request, 'pages/students/create.html')

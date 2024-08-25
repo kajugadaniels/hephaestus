@@ -10,4 +10,7 @@ urlpatterns = [
 
     path('users/', getUsers, name='getUsers'),
     path('user/add', addUser, name='addUser'),
+
+    path('students/', getStudents, name='getStudents'),
+    path('student/add', addStudent, name='addStudent'),
 ]  + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
