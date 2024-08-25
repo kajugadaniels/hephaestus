@@ -19,7 +19,7 @@ class UserCreationForm(forms.ModelForm):
         self.fields['name'].widget.attrs.update({'class': 'form-control', 'required': 'true'})
         self.fields['email'].widget.attrs.update({'class': 'form-control', 'required': 'true'})
         self.fields['phone_number'].widget.attrs.update({'class': 'form-control', 'required': 'true'})
-        self.fields['image'].widget.attrs.update({'class': 'form-control', 'required': 'true'})
+        self.fields['image'].widget.attrs.update({'class': 'form-control'})
         self.fields['role'].choices = [(role, role) for role in roles]
         self.fields['role'].widget.attrs.update({'class': 'form-control', 'required': 'true'})
 

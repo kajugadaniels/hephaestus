@@ -5,52 +5,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title> HEPHAESTUS </title>
+    <title>HEPHAESTUS</title>
     <meta name="Description" content="School management system">
     <meta name="Author" content="KAJUGA Daniels">
     <meta name="keywords" content="">
     <link rel="icon" href="{% static 'images/logo/favicon.png' %}" type="image/x-icon">
     <script src="{% static 'libs/choices.js/public/assets/scripts/choices.min.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
-    <link id="style" href="{% static 'libs/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" >
-    <link href="{% static 'css/styles.min.css' %}" rel="stylesheet" >
-    <link href="{% static 'libs/node-waves/waves.min.css' %}" rel="stylesheet" >
-    <link href="{% static 'libs/simplebar/simplebar.min.css' %}" rel="stylesheet" >
+    <link id="style" href="{% static 'libs/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/styles.min.css' %}" rel="stylesheet">
+    <link href="{% static 'libs/node-waves/waves.min.css' %}" rel="stylesheet">
+    <link href="{% static 'libs/simplebar/simplebar.min.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'libs/choices.js/public/assets/styles/choices.min.css' %}">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.css">
+
+    <!-- Toastr CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+    <!-- Custom CSS for Toastr Animations -->
     <style>
-        .swal2-container {
-            z-index: 10000 !important;
+        .toast-success {
+            background-color: #51A351 !important;
+            color: white;
         }
-        .swal2-toast {
-            background: linear-gradient(135deg, #8BC6EC 0%, #9599E2 100%);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.2);
-            color: #fff;
+        .toast-error {
+            background-color: #D9534F !important;
+            color: white;
         }
-        .swal2-title {
-            color: #fff !important;
+        .toast-warning {
+            background-color: #F0AD4E !important;
+            color: white;
         }
-        .swal2-toast-shown {
-            animation: fadeInRight 0.5s;
+        .toast-info {
+            background-color: #5BC0DE !important;
+            color: white;
         }
-        @keyframes fadeInRight {
+
+        /* Custom animation for Toastr notifications */
+        @keyframes fadeInDown {
             from {
                 opacity: 0;
-                transform: translate3d(100%, 0, 0);
+                transform: translateY(-50px);
             }
             to {
                 opacity: 1;
-                transform: none;
+                transform: translateY(0);
             }
         }
+
+        @keyframes fadeOutUp {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+        }
+
+        .toast {
+            animation: fadeInDown 0.5s, fadeOutUp 0.5s 4.5s;
+        }
     </style>
+
 </head>
 <body>
 
     <div class="page">
         {% include 'inc/header.html' %}
-
         {% include 'inc/sidebar.html' %}
 
         <div class="main-content app-content">
@@ -64,7 +87,7 @@
     <div id="responsive-overlay"></div>
     <script src="{% static 'libs/@popperjs/core/umd/popper.min.js' %}"></script>
     <script src="{% static 'libs/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-    <script src="{%  static 'js/defaultmenu.min.js' %}"></script>
+    <script src="{% static 'js/defaultmenu.min.js' %}"></script>
     <script src="{% static 'libs/node-waves/waves.min.js' %}"></script>
     <script src="{% static 'js/sticky.js' %}"></script>
     <script src="{% static 'libs/simplebar/simplebar.min.js' %}"></script>
@@ -73,36 +96,39 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
+
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
     <script>
         $(document).ready(function() {
             $('#datatable').DataTable();
 
-            // Function to show toast notification
-            function showToast(icon, title, text) {
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                    }
-                });
+            // Toastr options
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": true,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut",
+                "toastClass": 'toast animated'
+            };
 
-                Toast.fire({
-                    icon: icon,
-                    title: title,
-                    text: text
-                });
-            }
-
-            // Display Django messages as toast notifications
+            // Display Django messages using Toastr
             {% if messages %}
                 {% for message in messages %}
-                    showToast('{{ message.tags }}', '{{ message.tags|capfirst }}', '{{ message }}');
+                    var toastrType = "{{ message.tags }}";  // info, success, warning, error
+                    toastr[toastrType]("{{ message.message|escapejs }}");
                 {% endfor %}
             {% endif %}
         });
