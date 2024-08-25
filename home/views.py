@@ -20,3 +20,7 @@ def getUsers(request):
     }
 
     return render(request, 'pages/users/index.html', context)
+
+@login_required
+def addUser(request):
+    return render(request, 'pages/users/create.html');
