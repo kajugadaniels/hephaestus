@@ -18,6 +18,33 @@
     <link href="{% static 'libs/simplebar/simplebar.min.css' %}" rel="stylesheet" >
     <link rel="stylesheet" href="{% static 'libs/choices.js/public/assets/styles/choices.min.css' %}">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.css">
+    <style>
+        .swal2-container {
+            z-index: 10000 !important;
+        }
+        .swal2-toast {
+            background: linear-gradient(135deg, #8BC6EC 0%, #9599E2 100%);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.2);
+            color: #fff;
+        }
+        .swal2-title {
+            color: #fff !important;
+        }
+        .swal2-toast-shown {
+            animation: fadeInRight 0.5s;
+        }
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translate3d(100%, 0, 0);
+            }
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -46,9 +73,38 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
     <script>
         $(document).ready(function() {
             $('#datatable').DataTable();
+
+            // Function to show toast notification
+            function showToast(icon, title, text) {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+
+                Toast.fire({
+                    icon: icon,
+                    title: title,
+                    text: text
+                });
+            }
+
+            // Display Django messages as toast notifications
+            {% if messages %}
+                {% for message in messages %}
+                    showToast('{{ message.tags }}', '{{ message.tags|capfirst }}', '{{ message }}');
+                {% endfor %}
+            {% endif %}
         });
     </script>
 </body>

@@ -5,31 +5,23 @@ from django import forms
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.forms import UserCreationForm as BaseUserCreationForm
 
-class UserCreationForm(BaseUserCreationForm):
-    password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
-        validators=[validate_password]
-    )
-    password_confirmation = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control'})
-    )
+class UserCreationForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'required': 'true'}))
+    password_confirmation = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'required': 'true'}), label="Password Confirmation")
 
     class Meta:
         model = User
-        fields = ['name', 'email', 'phone_number', 'image', 'role']
-        widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'required': 'true'}),
-            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
-            'image': forms.FileInput(attrs={'class': 'form-control'}),
-            'role': forms.Select(attrs={'class': 'form-control', 'required': 'true'}),
-        }
+        fields = ['name', 'email', 'phone_number', 'image', 'role', 'password']
 
     def __init__(self, *args, **kwargs):
-        roles = kwargs.pop('roles', None)
-        super().__init__(*args, **kwargs)
-        if roles:
-            self.fields['role'].choices = roles
+        roles = kwargs.pop('roles', [])
+        super(UserCreationForm, self).__init__(*args, **kwargs)
+        self.fields['name'].widget.attrs.update({'class': 'form-control', 'required': 'true'})
+        self.fields['email'].widget.attrs.update({'class': 'form-control', 'required': 'true'})
+        self.fields['phone_number'].widget.attrs.update({'class': 'form-control', 'required': 'true'})
+        self.fields['image'].widget.attrs.update({'class': 'form-control', 'required': 'true'})
+        self.fields['role'].choices = [(role, role) for role in roles]
+        self.fields['role'].widget.attrs.update({'class': 'form-control', 'required': 'true'})
 
     def clean(self):
         cleaned_data = super().clean()
@@ -40,10 +32,3 @@ class UserCreationForm(BaseUserCreationForm):
             raise forms.ValidationError("Passwords do not match")
 
         return cleaned_data
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password"])
-        if commit:
-            user.save()
-        return user
