@@ -1,4 +1,5 @@
 from django import forms
+from account.models import User
 from django.contrib.auth import authenticate
 
 class LoginForm(forms.Form):
@@ -20,3 +21,18 @@ class LoginForm(forms.Form):
             if user is None:
                 raise forms.ValidationError("Invalid phone number or password")
         return cleaned_data
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['name', 'email', 'phone_number', 'image']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'image': forms.FileInput(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['image'].required = False

@@ -2,6 +2,7 @@ from account.forms import *
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login as auth_login, logout
 
 def user_login(request):
@@ -34,3 +35,20 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect('auth:login')
+
+@login_required
+def editProfile(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your profile has been updated successfully.')
+            return redirect('auth:editProfile')
+    else:
+        form = UserProfileForm(instance=request.user)
+    
+    context = {
+        'form': form,
+        'logged_in_user': request.user
+    }
+    return render(request, 'pages/auth/profile.html', context)
