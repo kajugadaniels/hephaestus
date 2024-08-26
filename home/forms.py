@@ -72,3 +72,17 @@ class StudentForm(forms.ModelForm):
     #         if image.content_type not in ['image/jpeg', 'image/png', 'image/webp']:
     #             raise forms.ValidationError("Please upload a JPEG, PNG or WebP image.")
     #     return image
+
+class TeacherForm(forms.ModelForm):
+    class Meta:
+        model = Teacher
+        exclude = ['user', 'created_at', 'updated_at', 'created_by', 'updated_by', 'delete_status']
+        widgets = {
+            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
+            'date_joined': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(TeacherForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control'})

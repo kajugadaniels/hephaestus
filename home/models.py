@@ -1,7 +1,7 @@
 import os
 import random
-from datetime import date
 from django.db import models
+from django.conf import settings
 from django.utils import timezone
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
@@ -97,3 +97,111 @@ class Student(models.Model):
 
     def __str__(self):
         return self.name
+
+class Teacher(models.Model):
+    GENDER_CHOICES = (
+        ('Male', 'Male'),
+        ('Female', 'Female'),
+        ('Other', 'Other'),
+    )
+
+    MARITAL_STATUS_CHOICES = (
+        ('Single', 'Single'),
+        ('Married', 'Married'),
+        ('Divorced', 'Divorced'),
+        ('Widowed', 'Widowed'),
+    )
+
+    EMPLOYMENT_STATUS_CHOICES = (
+        ('Full-time', 'Full-time'),
+        ('Part-time', 'Part-time'),
+        ('Contract', 'Contract'),
+        ('Temporary', 'Temporary'),
+    )
+
+    # Link to User model
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='teacher_profile')
+    
+    # Personal Information
+    employee_id = models.CharField(max_length=20, unique=True)
+    date_of_birth = models.DateField()
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
+    nationality = models.CharField(max_length=50)
+    national_id = models.CharField(max_length=20, unique=True)
+    marital_status = models.CharField(max_length=20, choices=MARITAL_STATUS_CHOICES)
+    
+    # Contact Information
+    alternative_phone_number = models.CharField(max_length=15, blank=True, null=True)
+    address = models.TextField()
+    
+    # Professional Information
+    position = models.CharField(max_length=100)
+    department = models.CharField(max_length=100)
+    employment_status = models.CharField(max_length=20, choices=EMPLOYMENT_STATUS_CHOICES)
+    date_joined = models.DateField()
+    years_of_experience = models.PositiveIntegerField()
+    
+    # Qualifications
+    highest_degree = models.CharField(max_length=100)
+    major = models.CharField(max_length=100)
+    institution = models.CharField(max_length=200)
+    graduation_year = models.PositiveIntegerField()
+    
+    # Additional Qualifications
+    certifications = models.TextField(blank=True)
+    skills = models.TextField(blank=True)
+    
+    # Teaching Information
+    subjects_taught = models.TextField()
+    classes_assigned = models.TextField()
+    
+    # Emergency Contact
+    emergency_contact_name = models.CharField(max_length=100)
+    emergency_contact_relationship = models.CharField(max_length=50)
+    emergency_contact_phone = models.CharField(max_length=15)
+    
+    # Additional Information
+    bio = models.TextField(blank=True)
+    achievements = models.TextField(blank=True)
+    
+    # System Fields
+    delete_status = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='teachers_created')
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='teachers_updated')
+
+    def __str__(self):
+        return self.user.name
+
+    class Meta:
+        ordering = ['user__name']
+        indexes = [
+            models.Index(fields=['employee_id']),
+            models.Index(fields=['national_id']),
+        ]
+
+    @property
+    def name(self):
+        return self.user.name
+
+    @property
+    def email(self):
+        return self.user.email
+
+    @property
+    def phone_number(self):
+        return self.user.phone_number
+
+    @property
+    def image(self):
+        return self.user.image
+
+    @property
+    def age(self):
+        today = timezone.now().date()
+        return today.year - self.date_of_birth.year - ((today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day))
+
+    def delete(self, *args, **kwargs):
+        self.delete_status = True
+        self.save()
