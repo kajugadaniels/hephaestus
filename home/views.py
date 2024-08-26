@@ -1,8 +1,9 @@
+from home.forms import *
+from home.models import *
 from account.models import *
 from django.contrib import messages
-from home.forms import UserCreationForm
-from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
 
 @login_required
 def dashboard(request):
@@ -68,8 +69,69 @@ def addUser(request):
 
 @login_required
 def getStudents(request):
-    return render(request, 'pages/students/index.html')
+    students = Student.objects.filter(delete_status=False)
+
+    context = {
+        'students': students
+    }
+
+    return render(request, 'pages/students/index.html', context)
 
 @login_required
 def addStudent(request):
-    return render(request, 'pages/students/create.html')
+    if request.method == 'POST':
+        form = StudentForm(request.POST, request.FILES)
+        if form.is_valid():
+            student = form.save(commit=False)
+            student.modified_by = request.user
+            student.save()
+            messages.success(request, 'Student added successfully.')
+            return redirect('home:getStudents')
+    else:
+        form = StudentForm()
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'pages/students/create.html', context)
+
+@login_required
+def viewStudent(request, slug):
+    student = get_object_or_404(Student, slug=slug, delete_status=False)
+
+    context = {
+        {'student': student}
+    }
+
+    return render(request, 'pages/students/show.html', context)
+
+@login_required
+def editStudent(request, slug):
+    student = get_object_or_404(Student, slug=slug, delete_status=False)
+    if request.method == 'POST':
+        form = StudentForm(request.POST, request.FILES, instance=student)
+        if form.is_valid():
+            student = form.save(commit=False)
+            student.modified_by = request.user
+            student.save()
+            messages.success(request, 'Student updated successfully.')
+            return redirect('home:viewStudent', slug=student.slug)
+    else:
+        form = StudentForm(instance=student)
+
+    context = {
+        'form': form,
+        'student': student
+    }
+
+    return render(request, 'pages/students/edit.html', context)
+
+@login_required
+def deleteStudent(request, slug):
+    student = get_object_or_404(Student, slug=slug, delete_status=False)
+    student.delete_status = True
+    student.modified_by = request.user
+    student.save()
+    messages.success(request, 'Student deleted successfully.')
+    return redirect('home:getStudents')

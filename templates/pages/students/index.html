@@ -23,18 +23,26 @@
                                 <thead>
                                     <tr>
                                         <th>Name</th>
+                                        <th>Roll ID</th>
                                         <th>Age</th>
                                         <th>Gender</th>
-                                        <th>Guardian</th>
+                                        <th>Current Status</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for user in getUsers %}
+                                    {% for student in students %}
                                         <tr>
-                                            <td>{{ user.name }}</td>
-                                            <td>{{ user.phone_number }}</td>
-                                            <td>{{ user.email }}</td>
-                                            <td>{{ user.role }}</td>
+                                            <td>{{ student.name }}</td>
+                                            <td>{{ student.roll_id }}</td>
+                                            <td>{{ student.age }}</td>
+                                            <td>{{ student.gender }}</td>
+                                            <td>{{ student.current_status }}</td>
+                                            <td>
+                                                <a href="{% url 'home:viewStudent' student.slug %}" class="btn btn-sm btn-info">View</a>
+                                                <a href="{% url 'home:editStudent' student.slug %}" class="btn btn-sm btn-warning">Edit</a>
+                                                <a href="{% url 'home:deleteStudent' student.slug %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this student?')">Delete</a>
+                                            </td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>

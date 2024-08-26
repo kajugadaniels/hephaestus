@@ -13,4 +13,7 @@ urlpatterns = [
 
     path('students/', getStudents, name='getStudents'),
     path('student/add', addStudent, name='addStudent'),
+    path('student/<slug:slug>', viewStudent, name='viewStudent'),
+    path('student/<slug:slug>/edit', editStudent, name='editStudent'),
+    path('student/<slug:slug>/delete', deleteStudent, name='deleteStudent'),
 ]  + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
