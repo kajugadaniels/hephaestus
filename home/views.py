@@ -69,7 +69,7 @@ def addUser(request):
 
 @login_required
 def getStudents(request):
-    students = Student.objects.filter(delete_status=False)
+    students = Student.objects.filter(delete_status=False).order_by('-created_at')
 
     context = {
         'students': students
@@ -101,7 +101,7 @@ def viewStudent(request, slug):
     student = get_object_or_404(Student, slug=slug, delete_status=False)
 
     context = {
-        {'student': student}
+        'student': student
     }
 
     return render(request, 'pages/students/show.html', context)
