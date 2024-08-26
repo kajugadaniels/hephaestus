@@ -122,9 +122,14 @@ def viewStudent(request, slug):
 def editStudent(request, slug):
     student = get_object_or_404(Student, slug=slug, delete_status=False)
     if request.method == 'POST':
-        form = StudentForm(request.POST, request.FILES, instance=student)
+        form = StudentForm(request.POST, instance=student)
         if form.is_valid():
             student = form.save(commit=False)
+            
+            # Handle image upload separately
+            if 'image' in request.FILES:
+                student.image = request.FILES['image']
+            
             student.modified_by = request.user
             student.save()
             messages.success(request, 'Student updated successfully.')
