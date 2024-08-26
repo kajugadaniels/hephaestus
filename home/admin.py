@@ -1,20 +1,21 @@
 from home.models import *
 from django.contrib import admin
+
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     list_display = (
         'name', 'slug', 'dob', 'gender', 'nationality', 
-        'cell', 'village', 'sector', 'district', 
+        'cell', 'village', 'sector', 'district', 'current_status',
         'emergency_contact_name', 'emergency_contact_relation', 
         'emergency_contact_phone', 'created_at', 'updated_at'
     )
     search_fields = (
-        'name', 'slug', 'cell', 'village', 
+        'name', 'slug', 'cell', 'village', 'current_status',
         'sector', 'district', 'emergency_contact_name', 
         'emergency_contact_relation', 'emergency_contact_phone'
     )
     prepopulated_fields = {'slug': ('name',)}
-    list_filter = ('gender', 'nationality', 'created_at', 'updated_at')
+    list_filter = ('gender', 'nationality', 'current_status', 'created_at', 'updated_at')
     readonly_fields = ('created_at', 'updated_at')
     
     def save_model(self, request, obj, form, change):

@@ -10,9 +10,9 @@ def dashboard(request):
 
 @login_required
 def getUsers(request):
-    # if request.user.role == 'Admin':
-    #     messages.error(request, "You are not authorized to access this page.")
-    #     return redirect('home:dashboard')
+    if not request.user.is_staff:
+        messages.error(request, 'You do not have permission to access this page.')
+        return redirect('home:dashboard')
 
     getUsers = User.objects.all().order_by('-created_at')
 
@@ -24,8 +24,8 @@ def getUsers(request):
 
 @login_required
 def addUser(request):
-    if request.user.role == 'Director':
-        messages.error(request, "You are not authorized to access this page.")
+    if not request.user.is_staff:
+        messages.error(request, 'You do not have permission to access this page.')
         return redirect('home:dashboard')
 
     roles = ['Admin', 'Director', 'Teacher', 'Student'] if request.user.role == 'Admin' or request.user.is_superuser else ['Director']
