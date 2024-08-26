@@ -46,7 +46,7 @@ class Student(models.Model):
     )
     dob = models.DateField(null=True, blank=True)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, null=True, blank=True)
-    current_status = models.CharField(max_length=20, choices=STUDENT_CURRENT_STATUS, null=True, blank=True)
+    current_status = models.CharField(max_length=20, choices=STUDENT_CURRENT_STATUS, default='Active', null=True, blank=True)
     nationality = models.CharField(max_length=40, null=True, blank=True)
 
     # Contact Info

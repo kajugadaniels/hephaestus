@@ -21,49 +21,59 @@
                         <form method="post" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
-                                    {{ form.name }}
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
+                                        {{ form.name }}
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="{{ form.dob.id_for_label }}" class="form-label">Date of Birth</label>
+                                        {{ form.dob }}
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="{{ form.gender.id_for_label }}" class="form-label">Gender</label>
+                                        {{ form.gender }}
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="{{ form.image.id_for_label }}" class="form-label">Student Image</label>
+                                        {{ form.image }}
+                                    </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.dob.id_for_label }}" class="form-label">Date of Birth</label>
-                                    {{ form.dob }}
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label for="{{ form.nationality.id_for_label }}" class="form-label">Nationality</label>
+                                        {{ form.nationality }}
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="{{ form.district.id_for_label }}" class="form-label">District</label>
+                                        {{ form.district }}
+                                    </div>
+                                    <div class="col-md-2 mb-3">
+                                        <label for="{{ form.sector.id_for_label }}" class="form-label">Sector</label>
+                                        {{ form.sector }}
+                                    </div>
+                                    <div class="col-md-2 mb-3">
+                                        <label for="{{ form.cell.id_for_label }}" class="form-label">Cell</label>
+                                        {{ form.cell }}
+                                    </div>
+                                    <div class="col-md-2 mb-3">
+                                        <label for="{{ form.village.id_for_label }}" class="form-label">Village</label>
+                                        {{ form.village }}
+                                    </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.gender.id_for_label }}" class="form-label">Gender</label>
-                                    {{ form.gender }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.nationality.id_for_label }}" class="form-label">Nationality</label>
-                                    {{ form.nationality }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.cell.id_for_label }}" class="form-label">Cell</label>
-                                    {{ form.cell }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.village.id_for_label }}" class="form-label">Village</label>
-                                    {{ form.village }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.sector.id_for_label }}" class="form-label">Sector</label>
-                                    {{ form.sector }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.district.id_for_label }}" class="form-label">District</label>
-                                    {{ form.district }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.emergency_contact_name.id_for_label }}" class="form-label">Emergency Contact Name</label>
-                                    {{ form.emergency_contact_name }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.emergency_contact_relation.id_for_label }}" class="form-label">Emergency Contact Relation</label>
-                                    {{ form.emergency_contact_relation }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.emergency_contact_phone.id_for_label }}" class="form-label">Emergency Contact Phone</label>
-                                    {{ form.emergency_contact_phone }}
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="{{ form.emergency_contact_name.id_for_label }}" class="form-label">Emergency Contact Name</label>
+                                        {{ form.emergency_contact_name }}
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="{{ form.emergency_contact_relation.id_for_label }}" class="form-label">Emergency Contact Relation</label>
+                                        {{ form.emergency_contact_relation }}
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="{{ form.emergency_contact_phone.id_for_label }}" class="form-label">Emergency Contact Phone</label>
+                                        {{ form.emergency_contact_phone }}
+                                    </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="{{ form.medical_conditions.id_for_label }}" class="form-label">Medical Conditions</label>
@@ -80,10 +90,6 @@
                                 <div class="col-md-6 mb-3">
                                     <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
                                     {{ form.notes }}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.image.id_for_label }}" class="form-label">Student Image</label>
-                                    {{ form.image }}
                                 </div>
                             </div>
                             <div class="text-end">
