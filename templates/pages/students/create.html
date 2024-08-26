@@ -3,6 +3,8 @@
 {% block content %}
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/quill-image-resize-module@3.0.0/image-resize.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/quill-image-resize-module@3.0.0/image-resize.min.js"></script>
 
     <style>
         .quill-editor {
@@ -127,6 +129,8 @@
         document.addEventListener("DOMContentLoaded", function() {
             var quillFields = ['medical_conditions', 'allergies', 'special_needs', 'notes'];
             
+            Quill.register('modules/imageResize', ImageResize.default);
+
             quillFields.forEach(function(field) {
                 var quill = new Quill('#' + field + '-container', {
                     theme: 'snow',
@@ -148,6 +152,8 @@
                                         var file = input.files[0];
                                         var formData = new FormData();
                                         formData.append('image', file);
+                                        var studentName = document.querySelector('#id_name').value;
+                                        formData.append('student_name', studentName);
                                         fetch("{% url 'home:upload_image' %}", {
                                             method: 'POST',
                                             body: formData,
@@ -168,6 +174,9 @@
                                     };
                                 }
                             }
+                        },
+                        imageResize: {
+                            modules: ['Resize', 'DisplaySize', 'Toolbar']
                         }
                     }
                 });
