@@ -1,5 +1,18 @@
 {% extends "layouts/app.html" %}
+
 {% block content %}
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+    <style>
+        .quill-editor {
+            height: 300px;
+        }
+        .ql-editor {
+            min-height: 300px;
+        }
+    </style>
+
     <div class="container-fluid">
         <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
             <h1 class="page-title fw-semibold fs-18 mb-0">Add Student</h1>
@@ -18,7 +31,7 @@
             <div class="col-xl-12">
                 <div class="card custom-card">
                     <div class="card-body">
-                        <form method="post" enctype="multipart/form-data">
+                        <form method="post" enctype="multipart/form-data" class="student-form">
                             {% csrf_token %}
                             <div class="row">
                                 <div class="row">
@@ -30,11 +43,15 @@
                                         <label for="{{ form.dob.id_for_label }}" class="form-label">Date of Birth</label>
                                         {{ form.dob }}
                                     </div>
-                                    <div class="col-md-3 mb-3">
+                                    <div class="col-md-2 mb-3">
                                         <label for="{{ form.gender.id_for_label }}" class="form-label">Gender</label>
                                         {{ form.gender }}
                                     </div>
-                                    <div class="col-md-3 mb-3">
+                                    <div class="col-md-2 mb-3">
+                                        <label for="{{ form.current_status.id_for_label }}" class="form-label">Current Status</label>
+                                        {{ form.current_status }}
+                                    </div>
+                                    <div class="col-md-2 mb-3">
                                         <label for="{{ form.image.id_for_label }}" class="form-label">Student Image</label>
                                         {{ form.image }}
                                     </div>
@@ -76,20 +93,24 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="{{ form.medical_conditions.id_for_label }}" class="form-label">Medical Conditions</label>
-                                    {{ form.medical_conditions }}
+                                    <label class="form-label">Medical Conditions</label>
+                                    <div id="medical_conditions-container" class="quill-editor"></div>
+                                    <textarea id="id_medical_conditions" name="medical_conditions" style="display:none;"></textarea>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="{{ form.allergies.id_for_label }}" class="form-label">Allergies</label>
-                                    {{ form.allergies }}
+                                    <label class="form-label">Allergies</label>
+                                    <div id="allergies-container" class="quill-editor"></div>
+                                    <textarea id="id_allergies" name="allergies" style="display:none;"></textarea>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="{{ form.special_needs.id_for_label }}" class="form-label">Special Needs</label>
-                                    {{ form.special_needs }}
+                                    <label class="form-label">Special Needs</label>
+                                    <div id="special_needs-container" class="quill-editor"></div>
+                                    <textarea id="id_special_needs" name="special_needs" style="display:none;"></textarea>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
-                                    {{ form.notes }}
+                                    <label class="form-label">Notes</label>
+                                    <div id="notes-container" class="quill-editor"></div>
+                                    <textarea id="id_notes" name="notes" style="display:none;"></textarea>
                                 </div>
                             </div>
                             <div class="text-end">
@@ -101,20 +122,69 @@
             </div>
         </div>
     </div>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-    $(document).ready(function() {
-        $('input[type="file"]').change(function(e) {
-            var file = e.target.files[0];
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var preview = $('<img>').attr('src', e.target.result).css('max-width', '200px');
-                $(e.target).parent().append(preview);
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var quillFields = ['medical_conditions', 'allergies', 'special_needs', 'notes'];
+            
+            quillFields.forEach(function(field) {
+                var quill = new Quill('#' + field + '-container', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: {
+                            container: [
+                                ['bold', 'italic', 'underline'],
+                                [{'header': 1}, {'header': 2}],
+                                [{'list': 'ordered'}, {'list': 'bullet'}],
+                                ['link', 'image']
+                            ],
+                            handlers: {
+                                image: function() {
+                                    var input = document.createElement('input');
+                                    input.setAttribute('type', 'file');
+                                    input.setAttribute('accept', 'image/*');
+                                    input.click();
+                                    input.onchange = function() {
+                                        var file = input.files[0];
+                                        var formData = new FormData();
+                                        formData.append('image', file);
+                                        fetch("{% url 'home:upload_image' %}", {
+                                            method: 'POST',
+                                            body: formData,
+                                            headers: {
+                                                'X-CSRFToken': '{{ csrf_token }}'
+                                            }
+                                        })
+                                        .then(response => response.json())
+                                        .then(result => {
+                                            if (result.location) {
+                                                var range = quill.getSelection();
+                                                quill.insertEmbed(range.index, 'image', result.location);
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error('Error:', error);
+                                        });
+                                    };
+                                }
+                            }
+                        }
+                    }
+                });
+
+                quill.on('text-change', function() {
+                    document.querySelector('#id_' + field).value = quill.root.innerHTML;
+                });
+            });
+
+            var form = document.querySelector('.student-form');
+            form.onsubmit = function() {
+                quillFields.forEach(function(field) {
+                    var quill = Quill.find(document.querySelector('#' + field + '-container'));
+                    var input = document.querySelector('#id_' + field);
+                    input.value = quill.root.innerHTML;
+                });
             };
-            reader.readAsDataURL(file);
         });
-    });
-</script>
+    </script>
 {% endblock %}

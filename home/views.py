@@ -1,7 +1,11 @@
 from home.forms import *
 from home.models import *
 from account.models import *
+from django.conf import settings
 from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.core.files.storage import default_storage
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -66,6 +70,14 @@ def addUser(request):
     }
 
     return render(request, 'pages/users/create.html', context)
+
+@csrf_exempt
+def upload_image(request):
+    if request.method == 'POST' and request.FILES['image']:
+        image = request.FILES['image']
+        path = default_storage.save(f'quill_images/{image.name}', image)
+        return JsonResponse({'location': f'{settings.MEDIA_URL}{path}'})
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 @login_required
 def getStudents(request):
