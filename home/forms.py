@@ -32,3 +32,43 @@ class UserCreationForm(forms.ModelForm):
             raise forms.ValidationError("Passwords do not match")
 
         return cleaned_data
+
+class StudentForm(forms.ModelForm):
+    class Meta:
+        model = Student
+        fields = ['name', 'image', 'dob', 'gender', 'current_status', 'nationality',
+                  'cell', 'village', 'sector', 'district', 'emergency_contact_name',
+                  'emergency_contact_relation', 'emergency_contact_phone',
+                  'medical_conditions', 'allergies', 'special_needs', 'notes']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'image': forms.FileInput(attrs={'class': 'form-control-file', 'accept': 'image/*'}),
+            'dob': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'gender': forms.Select(attrs={'class': 'form-control select2'}),
+            'current_status': forms.Select(attrs={'class': 'form-control select2'}),
+            'nationality': forms.TextInput(attrs={'class': 'form-control'}),
+            'cell': forms.TextInput(attrs={'class': 'form-control'}),
+            'village': forms.TextInput(attrs={'class': 'form-control'}),
+            'sector': forms.TextInput(attrs={'class': 'form-control'}),
+            'district': forms.TextInput(attrs={'class': 'form-control'}),
+            'emergency_contact_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'emergency_contact_relation': forms.TextInput(attrs={'class': 'form-control'}),
+            'emergency_contact_phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'medical_conditions': forms.Textarea(attrs={'class': 'form-control'}),
+            'allergies': forms.Textarea(attrs={'class': 'form-control'}),
+            'special_needs': forms.Textarea(attrs={'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(StudentForm, self).__init__(*args, **kwargs)
+        self.fields['image'].widget.attrs['onchange'] = 'previewImage(this);'
+
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+        if image:
+            if image.size > 5 * 1024 * 1024:  # 5MB limit
+                raise forms.ValidationError("Image file too large ( > 5MB )")
+            if image.content_type not in ['image/jpeg', 'image/png', 'image/webp']:
+                raise forms.ValidationError("Please upload a JPEG, PNG or WebP image.")
+        return image
