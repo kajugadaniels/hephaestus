@@ -76,13 +76,37 @@ class StudentForm(forms.ModelForm):
 class TeacherForm(forms.ModelForm):
     class Meta:
         model = Teacher
-        exclude = ['user', 'created_at', 'updated_at', 'created_by', 'updated_by', 'delete_status']
+        fields = ['employee_id', 'date_of_birth', 'gender', 'nationality', 'national_id', 'marital_status',
+                  'alternative_phone_number', 'address', 'position', 'department', 'employment_status',
+                  'date_joined', 'years_of_experience', 'highest_degree', 'major', 'institution',
+                  'graduation_year', 'certifications', 'skills', 'subjects_taught', 'classes_assigned',
+                  'emergency_contact_name', 'emergency_contact_relationship', 'emergency_contact_phone',
+                  'bio', 'achievements']
         widgets = {
-            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
-            'date_joined': forms.DateInput(attrs={'type': 'date'}),
+            'employee_id': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': 'true'}),
+            'gender': forms.Select(attrs={'class': 'form-control select2', 'required': 'true'}),
+            'nationality': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'national_id': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'marital_status': forms.Select(attrs={'class': 'form-control select2', 'required': 'true'}),
+            'alternative_phone_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'required': 'true'}),
+            'position': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'department': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'employment_status': forms.Select(attrs={'class': 'form-control select2', 'required': 'true'}),
+            'date_joined': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': 'true'}),
+            'years_of_experience': forms.NumberInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'highest_degree': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'major': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'institution': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'graduation_year': forms.NumberInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'certifications': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Optional'}),
+            'skills': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Optional'}),
+            'subjects_taught': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'required': 'true'}),
+            'classes_assigned': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'required': 'true'}),
+            'emergency_contact_name': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'emergency_contact_relationship': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'emergency_contact_phone': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Optional'}),
+            'achievements': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Optional'}),
         }
-
-    def __init__(self, *args, **kwargs):
-        super(TeacherForm, self).__init__(*args, **kwargs)
-        for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control'})
