@@ -1,0 +1,100 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
+        <h1 class="page-title fw-semibold fs-18 mb-0">Teacher Details</h1>
+        <div class="ms-md-1 ms-0">
+            <nav>
+                <ol class="breadcrumb mb-0">
+                    <a class="btn btn-primary me-2" href="{% url 'home:getTeachers' %}">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Teachers
+                    </a>
+                    <a class="btn btn-warning" href="{% url 'home:editTeacher' teacher.employee_id %}">
+                        <i class="fas fa-edit me-2"></i>Edit Teacher
+                    </a>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-4">
+                            {% if teacher.image %}
+                                <img src="{{ teacher.image.url }}" alt="{{ teacher.name }}" class="img-fluid rounded-circle" style="max-width: 200px;">
+                            {% else %}
+                                <img src="{% static 'images/default-avatar.png' %}" alt="Default Avatar" class="img-fluid rounded-circle" style="max-width: 200px;">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h2>{{ teacher.name }}</h2>
+                            <p><strong>Employee ID:</strong> {{ teacher.employee_id }}</p>
+                            <p><strong>Position:</strong> {{ teacher.position }}</p>
+                            <p><strong>Department:</strong> {{ teacher.department }}</p>
+                            <p><strong>Employment Status:</strong> {{ teacher.employment_status }}</p>
+                            <p><strong>Date Joined:</strong> {{ teacher.date_joined }}</p>
+                            <p><strong>Years of Experience:</strong> {{ teacher.years_of_experience }}</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3>Personal Information</h3>
+                            <p><strong>Date of Birth:</strong> {{ teacher.date_of_birth }}</p>
+                            <p><strong>Gender:</strong> {{ teacher.gender }}</p>
+                            <p><strong>Nationality:</strong> {{ teacher.nationality }}</p>
+                            <p><strong>National ID:</strong> {{ teacher.national_id }}</p>
+                            <p><strong>Marital Status:</strong> {{ teacher.marital_status }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h3>Contact Information</h3>
+                            <p><strong>Email:</strong> {{ teacher.email }}</p>
+                            <p><strong>Phone:</strong> {{ teacher.phone_number }}</p>
+                            <p><strong>Alternative Phone:</strong> {{ teacher.alternative_phone_number|default:"N/A" }}</p>
+                            <p><strong>Address:</strong> {{ teacher.address }}</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3>Qualifications</h3>
+                            <p><strong>Highest Degree:</strong> {{ teacher.highest_degree }}</p>
+                            <p><strong>Major:</strong> {{ teacher.major }}</p>
+                            <p><strong>Institution:</strong> {{ teacher.institution }}</p>
+                            <p><strong>Graduation Year:</strong> {{ teacher.graduation_year }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h3>Teaching Information</h3>
+                            <p><strong>Subjects Taught:</strong> {{ teacher.subjects_taught }}</p>
+                            <p><strong>Classes Assigned:</strong> {{ teacher.classes_assigned }}</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Additional Information</h3>
+                            <p><strong>Certifications:</strong> {{ teacher.certifications|default:"N/A" }}</p>
+                            <p><strong>Skills:</strong> {{ teacher.skills|default:"N/A" }}</p>
+                            <p><strong>Bio:</strong> {{ teacher.bio|default:"N/A" }}</p>
+                            <p><strong>Achievements:</strong> {{ teacher.achievements|default:"N/A" }}</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Emergency Contact</h3>
+                            <p><strong>Name:</strong> {{ teacher.emergency_contact_name }}</p>
+                            <p><strong>Relationship:</strong> {{ teacher.emergency_contact_relationship }}</p>
+                            <p><strong>Phone:</strong> {{ teacher.emergency_contact_phone }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
