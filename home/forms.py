@@ -90,7 +90,7 @@ class TeacherForm(forms.ModelForm):
             'national_id': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
             'marital_status': forms.Select(attrs={'class': 'form-control select2', 'required': 'true'}),
             'alternative_phone_number': forms.TextInput(attrs={'class': 'form-control'}),
-            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'required': 'true'}),
+            'address': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
             'position': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
             'department': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
             'employment_status': forms.Select(attrs={'class': 'form-control select2', 'required': 'true'}),

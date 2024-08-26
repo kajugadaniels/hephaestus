@@ -1,100 +1,213 @@
 {% extends "layouts/app.html" %}
 {% load static %}
-
 {% block content %}
-<div class="container-fluid">
-    <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
-        <h1 class="page-title fw-semibold fs-18 mb-0">Teacher Details</h1>
-        <div class="ms-md-1 ms-0">
-            <nav>
-                <ol class="breadcrumb mb-0">
-                    <a class="btn btn-primary me-2" href="{% url 'home:getTeachers' %}">
-                        <i class="fas fa-arrow-left me-2"></i>Back to Teachers
-                    </a>
-                    <a class="btn btn-warning" href="{% url 'home:editTeacher' teacher.employee_id %}">
-                        <i class="fas fa-edit me-2"></i>Edit Teacher
-                    </a>
-                </ol>
-            </nav>
+    <div class="container-fluid">
+        <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
+            <h1 class="page-title fw-semibold fs-18 mb-0">Teacher Details</h1>
+            <div class="ms-md-1 ms-0">
+                <nav>
+                    <ol class="breadcrumb mb-0">
+                        <a class="btn btn-primary" href="{% url 'home:getTeachers' %}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1.4em" height="1.4em" viewBox="0 0 48 48"><path fill="currentColor" fill-rule="evenodd" d="M6.695 22.188c1.879-2.127 4.73-4.563 8.391-6.222A11.96 11.96 0 0 0 12 24c0 3.09 1.168 5.907 3.086 8.034c-3.66-1.659-6.512-4.095-8.391-6.222a2.71 2.71 0 0 1 0-3.624m-1.499-1.324c3.408-3.858 9.885-8.771 18.626-8.863L24 12h.07c8.866 0 15.433 4.97 18.873 8.864a4.71 4.71 0 0 1 0 6.272C39.503 31.03 32.936 36 24.07 36H24l-.178-.001c-8.74-.092-15.218-5.005-18.626-8.863a4.71 4.71 0 0 1 0-6.272M24.028 14l-.181.001C18.394 14.083 14 18.528 14 24s4.395 9.917 9.847 9.999l.181.001C29.538 33.985 34 29.513 34 24s-4.462-9.985-9.972-10M36 24c0 3.14-1.207 6-3.182 8.139c3.774-1.66 6.707-4.155 8.626-6.327a2.71 2.71 0 0 0 0-3.624c-1.919-2.172-4.852-4.667-8.626-6.327A11.96 11.96 0 0 1 36 24m-11.93 6a6 6 0 0 0 5.415-8.587a2 2 0 1 1-2.828-2.828A6 6 0 1 0 24.07 30" clip-rule="evenodd"/></svg>
+                            Go Back
+                        </a>
+                    </ol>
+                </nav>
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-xl-12">
-            <div class="card custom-card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4 text-center mb-4">
-                            {% if teacher.image %}
-                                <img src="{{ teacher.image.url }}" alt="{{ teacher.name }}" class="img-fluid rounded-circle" style="max-width: 200px;">
-                            {% else %}
-                                <img src="{% static 'images/default-avatar.png' %}" alt="Default Avatar" class="img-fluid rounded-circle" style="max-width: 200px;">
-                            {% endif %}
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="row gx-5">
+                            <div class="col-xxl-3 col-xl-12">
+                                <div class="row">
+                                    <div class="col-xxl-12 col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-md-5 mb-3">
+                                        <div class="bg-light product-details-page">
+                                            {% if teacher.image %}
+                                                <img class="img-fluid" src="{{ teacher.image.url }}" alt="{{ teacher.name }}">
+                                            {% else %}
+                                                <img class="img-fluid" src="{% static 'images/default-avatar.png' %}" alt="Default Avatar">
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xxl-9 col-xl-12">
+                                <div class="row gx-5">
+                                    <div class="col-xl-8 mt-xxl-0 mt-3">
+                                        <div>
+                                            <p class="fs-18 fw-semibold mb-0">{{ teacher.name }}</p>
+                                            <div>
+                                                <p class="fs-14">
+                                                    <span class="fw-semibold text-muted ms-1">Employee ID: {{ teacher.employee_id }}</span> <br>
+                                                    <span class="fw-semibold text-muted ms-1">
+                                                        <span class="badge bg-primary">{{ teacher.employment_status }}</span>
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <div class="row mb-4">
+                                                <div class="col-xxl-3 col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                                    <p class="mb-2 fs-15 fw-semibold">Date of Birth</p>
+                                                    <p>{{ teacher.date_of_birth }}</p>
+                                                </div>
+                                                <div class="col-xxl-3 col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                                    <p class="mb-2 fs-15 fw-semibold">Age</p>
+                                                    <p>{{ teacher.age }}</p>
+                                                </div>
+                                                <div class="col-xxl-3 col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                                    <p class="mb-2 fs-15 fw-semibold">Gender</p>
+                                                    <p>{{ teacher.gender }}</p>
+                                                </div>
+                                                <div class="col-xxl-3 col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                                    <p class="mb-2 fs-15 fw-semibold">Nationality</p>
+                                                    <p>{{ teacher.nationality }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-4">
+                                                    <p class="fs-15 fw-semibold mb-2">Contact Information:</p>
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item"><strong>Email:</strong> {{ teacher.email }}</li>
+                                                        <li class="list-group-item"><strong>Phone:</strong> {{ teacher.phone_number }}</li>
+                                                        <li class="list-group-item"><strong>Alternative Phone:</strong> {{ teacher.alternative_phone_number|default:"N/A" }}</li>
+                                                        <li class="list-group-item"><strong>Address:</strong> {{ teacher.address }}</li>
+                                                    </ul>
+                                                </div>
+                                                <div class="col-md-6 mb-4">
+                                                    <p class="fs-15 fw-semibold mb-2">Emergency Contact:</p>
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item"><strong>Name:</strong> {{ teacher.emergency_contact_name }}</li>
+                                                        <li class="list-group-item"><strong>Relation:</strong> {{ teacher.emergency_contact_relationship }}</li>
+                                                        <li class="list-group-item"><strong>Phone:</strong> {{ teacher.emergency_contact_phone }}</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-4 mt-xxl-0 mt-3">
+                                        <div class="mb-4">
+                                            <p class="fs-15 fw-semibold mb-2">Employment Information:</p>
+                                            <ul class="list-group">
+                                                <li class="list-group-item"><strong>Position:</strong> {{ teacher.position }}</li>
+                                                <li class="list-group-item"><strong>Department:</strong> {{ teacher.department }}</li>
+                                                <li class="list-group-item"><strong>Date Joined:</strong> {{ teacher.date_joined }}</li>
+                                                <li class="list-group-item"><strong>Years of Experience:</strong> {{ teacher.years_of_experience }}</li>
+                                            </ul>
+                                        </div>
+                                        <div class="mb-4">
+                                            <p class="fs-15 fw-semibold mb-2">System Information:</p>
+                                            <ul class="list-group">
+                                                <li class="list-group-item"><strong>Created At:</strong> {{ teacher.created_at }}</li>
+                                                <li class="list-group-item"><strong>Last Updated:</strong> {{ teacher.updated_at }}</li>
+                                                <li class="list-group-item"><strong>Last Modified By:</strong> {{ teacher.updated_by }}</li>
+                                            </ul>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <a href="{% url 'home:editTeacher' teacher.employee_id %}" class="btn btn-primary">Edit Teacher</a>
+                                            <a href="{% url 'home:deleteTeacher' teacher.employee_id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this teacher?')">Delete Teacher</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-8">
-                            <h2>{{ teacher.name }}</h2>
-                            <p><strong>Employee ID:</strong> {{ teacher.employee_id }}</p>
-                            <p><strong>Position:</strong> {{ teacher.position }}</p>
-                            <p><strong>Department:</strong> {{ teacher.department }}</p>
-                            <p><strong>Employment Status:</strong> {{ teacher.employment_status }}</p>
-                            <p><strong>Date Joined:</strong> {{ teacher.date_joined }}</p>
-                            <p><strong>Years of Experience:</strong> {{ teacher.years_of_experience }}</p>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h3>Personal Information</h3>
-                            <p><strong>Date of Birth:</strong> {{ teacher.date_of_birth }}</p>
-                            <p><strong>Gender:</strong> {{ teacher.gender }}</p>
-                            <p><strong>Nationality:</strong> {{ teacher.nationality }}</p>
-                            <p><strong>National ID:</strong> {{ teacher.national_id }}</p>
-                            <p><strong>Marital Status:</strong> {{ teacher.marital_status }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <h3>Contact Information</h3>
-                            <p><strong>Email:</strong> {{ teacher.email }}</p>
-                            <p><strong>Phone:</strong> {{ teacher.phone_number }}</p>
-                            <p><strong>Alternative Phone:</strong> {{ teacher.alternative_phone_number|default:"N/A" }}</p>
-                            <p><strong>Address:</strong> {{ teacher.address }}</p>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h3>Qualifications</h3>
-                            <p><strong>Highest Degree:</strong> {{ teacher.highest_degree }}</p>
-                            <p><strong>Major:</strong> {{ teacher.major }}</p>
-                            <p><strong>Institution:</strong> {{ teacher.institution }}</p>
-                            <p><strong>Graduation Year:</strong> {{ teacher.graduation_year }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <h3>Teaching Information</h3>
-                            <p><strong>Subjects Taught:</strong> {{ teacher.subjects_taught }}</p>
-                            <p><strong>Classes Assigned:</strong> {{ teacher.classes_assigned }}</p>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h3>Additional Information</h3>
-                            <p><strong>Certifications:</strong> {{ teacher.certifications|default:"N/A" }}</p>
-                            <p><strong>Skills:</strong> {{ teacher.skills|default:"N/A" }}</p>
-                            <p><strong>Bio:</strong> {{ teacher.bio|default:"N/A" }}</p>
-                            <p><strong>Achievements:</strong> {{ teacher.achievements|default:"N/A" }}</p>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h3>Emergency Contact</h3>
-                            <p><strong>Name:</strong> {{ teacher.emergency_contact_name }}</p>
-                            <p><strong>Relationship:</strong> {{ teacher.emergency_contact_relationship }}</p>
-                            <p><strong>Phone:</strong> {{ teacher.emergency_contact_phone }}</p>
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h3 class="fs-18 fw-semibold mb-3">Additional Information</h3>
+                                <div class="accordion" id="additionalInfoAccordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="qualificationsHeader">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#qualificationsCollapse" aria-expanded="true" aria-controls="qualificationsCollapse">
+                                                Qualifications
+                                            </button>
+                                        </h2>
+                                        <div id="qualificationsCollapse" class="accordion-collapse collapse show" aria-labelledby="qualificationsHeader" data-bs-parent="#additionalInfoAccordion">
+                                            <div class="accordion-body">
+                                                <p><strong>Highest Degree:</strong> {{ teacher.highest_degree }}</p>
+                                                <p><strong>Major:</strong> {{ teacher.major }}</p>
+                                                <p><strong>Institution:</strong> {{ teacher.institution }}</p>
+                                                <p><strong>Graduation Year:</strong> {{ teacher.graduation_year }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="certificationsHeader">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#certificationsCollapse" aria-expanded="false" aria-controls="certificationsCollapse">
+                                                Certifications
+                                            </button>
+                                        </h2>
+                                        <div id="certificationsCollapse" class="accordion-collapse collapse" aria-labelledby="certificationsHeader" data-bs-parent="#additionalInfoAccordion">
+                                            <div class="accordion-body">
+                                                {{ teacher.certifications|default:"None"|safe }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="skillsHeader">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#skillsCollapse" aria-expanded="false" aria-controls="skillsCollapse">
+                                                Skills
+                                            </button>
+                                        </h2>
+                                        <div id="skillsCollapse" class="accordion-collapse collapse" aria-labelledby="skillsHeader" data-bs-parent="#additionalInfoAccordion">
+                                            <div class="accordion-body">
+                                                {{ teacher.skills|default:"None"|safe }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="subjectsTaughtHeader">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#subjectsTaughtCollapse" aria-expanded="false" aria-controls="subjectsTaughtCollapse">
+                                                Subjects Taught
+                                            </button>
+                                        </h2>
+                                        <div id="subjectsTaughtCollapse" class="accordion-collapse collapse" aria-labelledby="subjectsTaughtHeader" data-bs-parent="#additionalInfoAccordion">
+                                            <div class="accordion-body">
+                                                {{ teacher.subjects_taught|default:"None"|safe }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="classesAssignedHeader">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#classesAssignedCollapse" aria-expanded="false" aria-controls="classesAssignedCollapse">
+                                                Classes Assigned
+                                            </button>
+                                        </h2>
+                                        <div id="classesAssignedCollapse" class="accordion-collapse collapse" aria-labelledby="classesAssignedHeader" data-bs-parent="#additionalInfoAccordion">
+                                            <div class="accordion-body">
+                                                {{ teacher.classes_assigned|default:"None"|safe }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="bioHeader">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#bioCollapse" aria-expanded="false" aria-controls="bioCollapse">
+                                                Bio
+                                            </button>
+                                        </h2>
+                                        <div id="bioCollapse" class="accordion-collapse collapse" aria-labelledby="bioHeader" data-bs-parent="#additionalInfoAccordion">
+                                            <div class="accordion-body">
+                                                {{ teacher.bio|default:"None"|safe }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="achievementsHeader">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#achievementsCollapse" aria-expanded="false" aria-controls="achievementsCollapse">
+                                                Achievements
+                                            </button>
+                                        </h2>
+                                        <div id="achievementsCollapse" class="accordion-collapse collapse" aria-labelledby="achievementsHeader" data-bs-parent="#additionalInfoAccordion">
+                                            <div class="accordion-body">
+                                                {{ teacher.achievements|default:"None"|safe }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}
