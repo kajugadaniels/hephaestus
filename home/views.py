@@ -152,3 +152,52 @@ def deleteStudent(request, slug):
     student.save()
     messages.success(request, 'Student deleted successfully.')
     return redirect('home:getStudents')
+
+@login_required
+def getTeachers(request):
+    teachers = Teacher.objects.filter(delete_status=False).order_by('-created_at')
+    return render(request, 'pages/teachers/index.html', {'teachers': teachers})
+
+@login_required
+def addTeacher(request):
+    if request.method == 'POST':
+        form = TeacherForm(request.POST)
+        if form.is_valid():
+            teacher = form.save(commit=False)
+            teacher.user = request.user
+            teacher.created_by = request.user
+            teacher.save()
+            messages.success(request, 'Teacher added successfully.')
+            return redirect('home:getTeachers')
+    else:
+        form = TeacherForm()
+    return render(request, 'pages/teachers/create.html', {'form': form})
+
+@login_required
+def viewTeacher(request, employee_id):
+    teacher = get_object_or_404(Teacher, employee_id=employee_id, delete_status=False)
+    return render(request, 'pages/teachers/show.html', {'teacher': teacher})
+
+@login_required
+def editTeacher(request, employee_id):
+    teacher = get_object_or_404(Teacher, employee_id=employee_id, delete_status=False)
+    if request.method == 'POST':
+        form = TeacherForm(request.POST, instance=teacher)
+        if form.is_valid():
+            teacher = form.save(commit=False)
+            teacher.updated_by = request.user
+            teacher.save()
+            messages.success(request, 'Teacher updated successfully.')
+            return redirect('home:viewTeacher', employee_id=teacher.employee_id)
+    else:
+        form = TeacherForm(instance=teacher)
+    return render(request, 'pages/teachers/edit.html', {'form': form, 'teacher': teacher})
+
+@login_required
+def deleteTeacher(request, employee_id):
+    teacher = get_object_or_404(Teacher, employee_id=employee_id, delete_status=False)
+    teacher.delete_status = True
+    teacher.updated_by = request.user
+    teacher.save()
+    messages.success(request, 'Teacher deleted successfully.')
+    return redirect('home:getTeachers')
