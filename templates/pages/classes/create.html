@@ -1,0 +1,81 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
+        <h1 class="page-title fw-semibold fs-18 mb-0">Add Class</h1>
+        <div class="ms-md-1 ms-0">
+            <nav>
+                <ol class="breadcrumb mb-0">
+                    <a class="btn btn-primary" href="{% url 'home:getClasses' %}">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Classes
+                    </a>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
+                                {{ form.name }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.grade.id_for_label }}" class="form-label">Grade</label>
+                                {{ form.grade }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.section.id_for_label }}" class="form-label">Section</label>
+                                {{ form.section }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.head_teacher.id_for_label }}" class="form-label">Head Teacher</label>
+                                {% comment %} {{ form.head_teacher }} {% endcomment %}
+                                <select class="form-control" name="head_teacher" id="choices-multiple-remove-button">
+                                    <option>------</option>
+                                    {% for teacher in headTeachers %}
+                                        <option value="{{ teacher.id }}">{{ teacher.user.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.capacity.id_for_label }}" class="form-label">Capacity</label>
+                                {{ form.capacity }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.academic_year.id_for_label }}" class="form-label">Academic Year</label>
+                                {% comment %} {{ form.academic_year }} {% endcomment %}
+                                
+                                <select class="form-control" data-trigger name="academic_year" id="choices-multiple-default">
+                                    {% for year in academicYears %}
+                                        <option value="{{ year.id }}">{{ year.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <p class="fw-semibold mb-2">Students</p>
+                                <select class="form-control" name="students" id="choices-multiple-groups" multiple>
+                                    <option value="">Choose Students</option>
+                                    <optgroup>
+                                        {% for student in students %}
+                                            <option value="{{ student.id }}">{{ student.name }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">Add Class</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

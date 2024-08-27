@@ -363,9 +363,16 @@ def addClass(request):
             return redirect('home:getClasses')
     else:
         form = ClassForm()
+    
+    students = Student.objects.filter(delete_status=False).order_by('-created_at')
+    headTeachers = Teacher.objects.filter(delete_status=False).order_by('-created_at')
+    academicYears = AcademicYear.objects.filter(delete_status=False).order_by('-created_at')
 
     context = {
-        'form': form
+        'form': form,
+        'students': students,
+        'headTeachers': headTeachers,
+        'academicYears': academicYears,
     }
 
     return render(request, 'pages/classes/create.html', context)
