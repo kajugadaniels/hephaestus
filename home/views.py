@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db import IntegrityError
+from django.db.models import Exists, OuterRef
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.contrib.auth.decorators import login_required
@@ -357,18 +358,37 @@ def addClass(request):
         form = ClassForm(request.POST)
         try:
             if form.is_valid():
+                academic_year = form.cleaned_data['academic_year']
+                
                 class_obj = form.save(commit=False)
                 class_obj.created_by = request.user
                 class_obj.save()
                 
                 # Handle students separately
                 student_ids = request.POST.getlist('students')
-                students = Student.objects.filter(id__in=student_ids)
-                class_obj.students.set(students)
+                
+                # Filter students who are not already in a class for this academic year
+                available_students = Student.objects.filter(
+                    id__in=student_ids,
+                    delete_status=False,
+                    current_status='Active'
+                ).exclude(
+                    Exists(
+                        Class.objects.filter(
+                            academic_year=academic_year,
+                            students=OuterRef('pk')
+                        )
+                    )
+                )
+                
+                class_obj.students.set(available_students)
                 
                 # Set capacity to the number of selected students
-                class_obj.capacity = students.count()
+                class_obj.capacity = available_students.count()
                 class_obj.save()
+                
+                if available_students.count() < len(student_ids):
+                    messages.warning(request, 'Some students were not added as they are already assigned to a class in this academic year.')
                 
                 messages.success(request, 'Class added successfully.')
                 return redirect('home:getClasses')
@@ -385,7 +405,24 @@ def addClass(request):
     else:
         form = ClassForm()
     
-    students = Student.objects.filter(delete_status=False).order_by('-created_at')
+    # Fetch students not assigned to any class in the current academic year
+    current_academic_year = AcademicYear.objects.filter(delete_status=False).order_by('-created_at').first()
+    
+    if current_academic_year:
+        students = Student.objects.filter(
+            delete_status=False,
+            current_status='Active'
+        ).exclude(
+            Exists(
+                Class.objects.filter(
+                    academic_year=current_academic_year,
+                    students=OuterRef('pk')
+                )
+            )
+        ).order_by('-created_at')
+    else:
+        students = Student.objects.filter(delete_status=False, current_status='Active').order_by('-created_at')
+    
     headTeachers = Teacher.objects.filter(delete_status=False).order_by('-created_at')
     academicYears = AcademicYear.objects.filter(delete_status=False).order_by('-created_at')
 
@@ -401,9 +438,11 @@ def addClass(request):
 @login_required
 def viewClass(request, id):
     class_obj = get_object_or_404(Class, id=id, delete_status=False)
+    active_students = class_obj.students.filter(delete_status=False, current_status='Active')
 
     context = {
-        'class': class_obj
+        'class': class_obj,
+        'active_students': active_students
     }
 
     return render(request, 'pages/classes/show.html', context)

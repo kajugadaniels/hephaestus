@@ -14,7 +14,7 @@ class Command(BaseCommand):
         fake = Faker()
 
         # Create 30 fake students
-        for _ in range(30):
+        for _ in range(300):
             name = fake.name()
             dob = fake.date_of_birth(minimum_age=5, maximum_age=18)
             gender = random.choice(['Male', 'Female'])

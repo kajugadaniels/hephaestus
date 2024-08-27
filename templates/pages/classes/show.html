@@ -43,24 +43,14 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for student in class.students.all %}
+                                {% for student in active_students %}
                                     <tr>
                                         <td>{{ student.name }}</td>
                                         <td>{{ student.roll_id }}</td>
                                         <td>{{ student.age }}</td>
                                         <td>{{ student.gender }}</td>
                                         <td>
-                                            {% if student.current_status == 'Active' %}
-                                                <span class="badge bg-success">{{ student.current_status }}</span>
-                                            {% elif student.current_status == 'Graduated' %}
-                                                <span class="badge bg-primary">{{ student.current_status }}</span>
-                                            {% elif student.current_status == 'Transferred' %}
-                                                <span class="badge bg-warning text-dark">{{ student.current_status }}</span>
-                                            {% elif student.current_status == 'Dropped' %}
-                                                <span class="badge bg-danger">{{ student.current_status }}</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">{{ student.current_status }}</span>
-                                            {% endif %}
+                                            <span class="badge bg-success">{{ student.current_status }}</span>
                                         </td>
                                         <td>
                                             <a href="{% url 'home:viewStudent' student.slug %}" class="btn btn-sm btn-info">View</a>

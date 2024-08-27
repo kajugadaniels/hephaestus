@@ -3,9 +3,11 @@ import random
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.dispatch import receiver
 from django.utils.text import slugify
 from imagekit.processors import ResizeToFill
 from django.contrib.auth import get_user_model
+from django.db.models.signals import post_save
 from imagekit.models import ProcessedImageField
 from django.core.exceptions import ValidationError
 
@@ -98,6 +100,14 @@ class Student(models.Model):
 
     def __str__(self):
         return self.name
+
+@receiver(post_save, sender=Student)
+def update_class_on_student_change(sender, instance, **kwargs):
+    if instance.delete_status or instance.current_status != 'Active':
+        for class_obj in instance.classes.all():
+            class_obj.students.remove(instance)
+            class_obj.capacity = class_obj.students.count()
+            class_obj.save()
 
 class Teacher(models.Model):
     GENDER_CHOICES = (
@@ -273,7 +283,7 @@ class Class(models.Model):
         ('D', 'D'),
     ]
 
-    name = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    name = models.CharField(max_length=50, null=True, blank=True)
     grade = models.CharField(max_length=1, choices=GRADE_CHOICES, null=True, blank=True)
     section = models.CharField(max_length=1, choices=SECTION_CHOICES, null=True, blank=True)
     head_teacher = models.ForeignKey('Teacher', on_delete=models.SET_NULL, null=True, blank=True, related_name='headed_classes')
