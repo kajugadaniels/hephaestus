@@ -121,3 +121,13 @@ class TermForm(forms.ModelForm):
             'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': 'true'}),
             'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': 'true'}),
         }
+
+class AcademicYearForm(forms.ModelForm):
+    class Meta:
+        model = AcademicYear
+        fields = ['name', 'start_date', 'end_date']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': 'true'}),
+            'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': 'true'}),
+        }
