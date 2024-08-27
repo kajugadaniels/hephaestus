@@ -259,3 +259,21 @@ class Subject(models.Model):
     def __str__(self):
         return self.name
 
+class ClassSubject(models.Model):
+    class_group = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='class_subjects')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='class_subjects')
+    teacher = models.ForeignKey('Teacher', on_delete=models.SET_NULL, null=True, related_name='taught_subjects')
+    schedule = models.TextField()  # This could be JSON data representing the class schedule
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='class_subjects_created')
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='class_subjects_updated')
+    delete_status = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ['class_group', 'subject']
+
+    def __str__(self):
+        return f"{self.class_group} - {self.subject}"
+
