@@ -4,6 +4,7 @@ from account.models import *
 from django.conf import settings
 from django.contrib import messages
 from django.http import JsonResponse
+from django.db import IntegrityError
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.contrib.auth.decorators import login_required
@@ -354,13 +355,33 @@ def getClasses(request):
 def addClass(request):
     if request.method == 'POST':
         form = ClassForm(request.POST)
-        if form.is_valid():
-            class_obj = form.save(commit=False)
-            class_obj.created_by = request.user
-            class_obj.save()
-            form.save_m2m()  # Save many-to-many relationships
-            messages.success(request, 'Class added successfully.')
-            return redirect('home:getClasses')
+        try:
+            if form.is_valid():
+                class_obj = form.save(commit=False)
+                class_obj.created_by = request.user
+                class_obj.save()
+                
+                # Handle students separately
+                student_ids = request.POST.getlist('students')
+                students = Student.objects.filter(id__in=student_ids)
+                class_obj.students.set(students)
+                
+                # Set capacity to the number of selected students
+                class_obj.capacity = students.count()
+                class_obj.save()
+                
+                messages.success(request, 'Class added successfully.')
+                return redirect('home:getClasses')
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field.capitalize()}: {error}")
+        except IntegrityError:
+            messages.error(request, 'A class with the same grade, section, and academic year already exists.')
+        except ValidationError as e:
+            messages.error(request, f"Validation error: {e}")
+        except Exception as e:
+            messages.error(request, f"An unexpected error occurred: {e}")
     else:
         form = ClassForm()
     

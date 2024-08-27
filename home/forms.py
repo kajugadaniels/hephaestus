@@ -133,26 +133,22 @@ class AcademicYearForm(forms.ModelForm):
         }
 
 class ClassForm(forms.ModelForm):
-    students = forms.ModelMultipleChoiceField(
-        queryset=Student.objects.filter(delete_status=False),
-        widget=forms.SelectMultiple(attrs={'class': 'form-control', 'id': 'student-select'}),
-        required=False
-    )
+    # students = forms.ModelMultipleChoiceField(
+    #     queryset=Student.objects.filter(delete_status=False),
+    #     required=False
+    # )
 
     class Meta:
         model = Class
         fields = ['name', 'grade', 'section', 'head_teacher', 'students', 'capacity', 'academic_year']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
-            'grade': forms.Select(attrs={'class': 'form-control select2', 'required': 'true'}),
-            'section': forms.Select(attrs={'class': 'form-control select2', 'required': 'true'}),
-            'head_teacher': forms.Select(attrs={'class': 'form-control select2', 'required': 'true'}),
-            'capacity': forms.NumberInput(attrs={'class': 'form-control', 'required': 'true'}),
-            # 'academic_year': forms.Select(attrs={'class': 'form-control select2', 'required': 'true'}),
+            'grade': forms.Select(attrs={'class': 'form-control', 'required': 'true'}),
+            'section': forms.Select(attrs={'class': 'form-control', 'required': 'true'}),
         }
 
     def __init__(self, *args, **kwargs):
         super(ClassForm, self).__init__(*args, **kwargs)
-        # self.fields['head_teacher'].queryset = Teacher.objects.filter(delete_status=False)
-        # self.fields['academic_year'].queryset = AcademicYear.objects.filter(delete_status=False)
+        self.fields['head_teacher'].queryset = Teacher.objects.filter(delete_status=False)
+        self.fields['academic_year'].queryset = AcademicYear.objects.filter(delete_status=False)
 

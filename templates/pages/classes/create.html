@@ -45,7 +45,7 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="{{ form.capacity.id_for_label }}" class="form-label">Capacity</label>
-                                {{ form.capacity }}
+                                <input type="number" id="id_capacity" name="capacity" class="form-control" readonly>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="{{ form.academic_year.id_for_label }}" class="form-label">Academic Year</label>
@@ -78,4 +78,18 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var studentSelect = document.getElementById('choices-multiple-groups');
+        var capacityInput = document.getElementById('id_capacity');
+
+        function updateCapacity() {
+            capacityInput.value = studentSelect.selectedOptions.length;
+        }
+
+        studentSelect.addEventListener('change', updateCapacity);
+        updateCapacity(); // Initial update
+    });
+</script>
 {% endblock %}
