@@ -270,3 +270,72 @@ def deleteTerm(request, id):
     term.save()
     messages.success(request, 'Term deleted successfully.')
     return redirect('home:getTerms')
+
+@login_required
+def getAcademicYears(request):
+    academic_years = AcademicYear.objects.filter(delete_status=False)
+
+    context = {
+        'academic_years': academic_years
+    }
+
+    return render(request, 'pages/academicYears/index.html', context)
+
+@login_required
+def addAcademicYear(request):
+    if request.method == 'POST':
+        form = AcademicYearForm(request.POST)
+        if form.is_valid():
+            academic_year = form.save(commit=False)
+            academic_year.created_by = request.user
+            academic_year.save()
+            messages.success(request, 'Academic Year added successfully.')
+            return redirect('home:getAcademicYears')
+    else:
+        form = AcademicYearForm()
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'pages/academicYears/create.html', context)
+
+@login_required
+def viewAcademicYear(request, id):
+    academic_year = get_object_or_404(AcademicYear, id=id, delete_status=False)
+
+    context = {
+        'academic_year': academic_year
+    }
+
+    return render(request, 'pages/academicYears/show.html', context)
+
+@login_required
+def editAcademicYear(request, id):
+    academic_year = get_object_or_404(AcademicYear, id=id, delete_status=False)
+    if request.method == 'POST':
+        form = AcademicYearForm(request.POST, instance=academic_year)
+        if form.is_valid():
+            academic_year = form.save(commit=False)
+            academic_year.updated_by = request.user
+            academic_year.save()
+            messages.success(request, 'Academic Year updated successfully.')
+            return redirect('home:viewAcademicYear', id=academic_year.id)
+    else:
+        form = AcademicYearForm(instance=academic_year)
+
+    context = {
+        'form': form,
+        'academic_year': academic_year
+    }
+
+    return render(request, 'pages/academicYears/edit.html', context)
+
+@login_required
+def deleteAcademicYear(request, id):
+    academic_year = get_object_or_404(AcademicYear, id=id, delete_status=False)
+    academic_year.delete_status = True
+    academic_year.updated_by = request.user
+    academic_year.save()
+    messages.success(request, 'Academic Year deleted successfully.')
+    return redirect('home:getAcademicYears')
