@@ -339,3 +339,74 @@ def deleteAcademicYear(request, id):
     academic_year.save()
     messages.success(request, 'Academic Year deleted successfully.')
     return redirect('home:getAcademicYears')
+
+@login_required
+def getClasses(request):
+    classes = Class.objects.filter(delete_status=False)
+
+    context = {
+        'classes': classes
+    }
+
+    return render(request, 'classes/index.html', context)
+
+@login_required
+def addClass(request):
+    if request.method == 'POST':
+        form = ClassForm(request.POST)
+        if form.is_valid():
+            class_obj = form.save(commit=False)
+            class_obj.created_by = request.user
+            class_obj.save()
+            form.save_m2m()  # Save many-to-many relationships
+            messages.success(request, 'Class added successfully.')
+            return redirect('home:getClasses')
+    else:
+        form = ClassForm()
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'classes/create.html', context)
+
+@login_required
+def viewClass(request, id):
+    class_obj = get_object_or_404(Class, id=id, delete_status=False)
+
+    context = {
+        'class': class_obj
+    }
+
+    return render(request, 'classes/show.html', context)
+
+@login_required
+def editClass(request, id):
+    class_obj = get_object_or_404(Class, id=id, delete_status=False)
+    if request.method == 'POST':
+        form = ClassForm(request.POST, instance=class_obj)
+        if form.is_valid():
+            class_obj = form.save(commit=False)
+            class_obj.updated_by = request.user
+            class_obj.save()
+            form.save_m2m()  # Save many-to-many relationships
+            messages.success(request, 'Class updated successfully.')
+            return redirect('home:viewClass', id=class_obj.id)
+    else:
+        form = ClassForm(instance=class_obj)
+
+    context = {
+        'form': form,
+        'class': class_obj
+    }
+
+    return render(request, 'classes/edit.html', context)
+
+@login_required
+def deleteClass(request, id):
+    class_obj = get_object_or_404(Class, id=id, delete_status=False)
+    class_obj.delete_status = True
+    class_obj.updated_by = request.user
+    class_obj.save()
+    messages.success(request, 'Class deleted successfully.')
+    return redirect('home:getClasses')
