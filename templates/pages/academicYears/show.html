@@ -76,7 +76,7 @@
                                                         <td>
                                                             <a href="{% url 'home:viewClass' class.id %}" class="btn btn-sm btn-info">View</a>
                                                             <a href="{% url 'home:editClass' class.id %}" class="btn btn-sm btn-warning">Edit</a>
-                                                            <a href="{% url 'home:deleteClass' class.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this class?')">Delete</a>
+                                                            {% comment %} <a href="{% url 'home:deleteClass' class.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this class?')">Delete</a> {% endcomment %}
                                                         </td>
                                                     </tr>
                                                 {% endfor %}
