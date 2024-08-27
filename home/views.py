@@ -353,15 +353,16 @@ def getClasses(request):
     return render(request, 'pages/classes/index.html', context)
 
 @login_required
-def addClass(request):
+def addClass(request, academic_year_id):
+    academic_year = get_object_or_404(AcademicYear, id=academic_year_id)
+    
     if request.method == 'POST':
         form = ClassForm(request.POST)
         try:
             if form.is_valid():
-                academic_year = form.cleaned_data['academic_year']
-                
                 class_obj = form.save(commit=False)
                 class_obj.created_by = request.user
+                class_obj.academic_year = academic_year
                 class_obj.save()
                 
                 # Handle students separately
@@ -403,34 +404,28 @@ def addClass(request):
         except Exception as e:
             messages.error(request, f"An unexpected error occurred: {e}")
     else:
-        form = ClassForm()
+        form = ClassForm(initial={'academic_year': academic_year})
     
     # Fetch students not assigned to any class in the current academic year
-    current_academic_year = AcademicYear.objects.filter(delete_status=False).order_by('-created_at').first()
-    
-    if current_academic_year:
-        students = Student.objects.filter(
-            delete_status=False,
-            current_status='Active'
-        ).exclude(
-            Exists(
-                Class.objects.filter(
-                    academic_year=current_academic_year,
-                    students=OuterRef('pk')
-                )
+    students = Student.objects.filter(
+        delete_status=False,
+        current_status='Active'
+    ).exclude(
+        Exists(
+            Class.objects.filter(
+                academic_year=academic_year,
+                students=OuterRef('pk')
             )
-        ).order_by('-created_at')
-    else:
-        students = Student.objects.filter(delete_status=False, current_status='Active').order_by('-created_at')
+        )
+    ).order_by('-created_at')
     
     headTeachers = Teacher.objects.filter(delete_status=False).order_by('-created_at')
-    academicYears = AcademicYear.objects.filter(delete_status=False).order_by('-created_at')
-
+    
     context = {
         'form': form,
         'students': students,
         'headTeachers': headTeachers,
-        'academicYears': academicYears,
+        'academic_year': academic_year,
     }
 
     return render(request, 'pages/classes/create.html', context)

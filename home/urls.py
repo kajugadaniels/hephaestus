@@ -38,7 +38,7 @@ urlpatterns = [
     path('academic-year/<int:id>/delete/', deleteAcademicYear, name='deleteAcademicYear'),
 
     path('classes/', getClasses, name='getClasses'),
-    path('class/add/', addClass, name='addClass'),
+    path('class/add/<str:academic_year_id>', addClass, name='addClass'),
     path('class/<int:id>/', viewClass, name='viewClass'),
     path('class/<int:id>/edit/', editClass, name='editClass'),
     path('class/<int:id>/delete/', deleteClass, name='deleteClass'),

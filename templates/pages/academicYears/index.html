@@ -39,6 +39,7 @@
                                             <a href="{% url 'home:viewAcademicYear' academic_year.id %}" class="btn btn-sm btn-info">View</a>
                                             <a href="{% url 'home:editAcademicYear' academic_year.id %}" class="btn btn-sm btn-warning">Edit</a>
                                             <a href="{% url 'home:deleteAcademicYear' academic_year.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this academic year?')">Delete</a>
+                                            <a href="{% url 'home:addClass' academic_year.id %}" class="btn btn-sm btn-success">Add Class</a>
                                         </td>
                                     </tr>
                                 {% endfor %}

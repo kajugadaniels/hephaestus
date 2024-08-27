@@ -49,12 +49,8 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="{{ form.academic_year.id_for_label }}" class="form-label">Academic Year</label>
-                                {% comment %} {{ form.academic_year }} {% endcomment %}
-                                
                                 <select class="form-control" data-trigger name="academic_year" id="choices-multiple-default">
-                                    {% for year in academicYears %}
-                                        <option value="{{ year.id }}">{{ year.name }}</option>
-                                    {% endfor %}
+                                    <option value="{{ academic_year.id }}" selected>{{ academic_year.name }}</option>
                                 </select>
                             </div>
                             <div class="col-md-12 mb-3">
