@@ -124,46 +124,46 @@ class Teacher(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='teacher_profile')
     
     # Personal Information
-    employee_id = models.CharField(max_length=20, unique=True)
-    date_of_birth = models.DateField()
-    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
-    nationality = models.CharField(max_length=50)
-    national_id = models.CharField(max_length=20, unique=True)
-    marital_status = models.CharField(max_length=20, choices=MARITAL_STATUS_CHOICES)
+    employee_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, null=True, blank=True)
+    nationality = models.CharField(max_length=50, null=True, blank=True)
+    national_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    marital_status = models.CharField(max_length=20, choices=MARITAL_STATUS_CHOICES, null=True, blank=True)
     
     # Contact Information
     alternative_phone_number = models.CharField(max_length=15, blank=True, null=True)
-    address = models.TextField()
+    address = models.TextField(null=True, blank=True)
     
     # Professional Information
-    position = models.CharField(max_length=100)
-    department = models.CharField(max_length=100)
-    employment_status = models.CharField(max_length=20, choices=EMPLOYMENT_STATUS_CHOICES)
-    date_joined = models.DateField()
-    years_of_experience = models.PositiveIntegerField()
+    position = models.CharField(max_length=100, null=True, blank=True)
+    department = models.CharField(max_length=100, null=True, blank=True)
+    employment_status = models.CharField(max_length=20, choices=EMPLOYMENT_STATUS_CHOICES, null=True, blank=True)
+    date_joined = models.DateField(null=True, blank=True)
+    years_of_experience = models.PositiveIntegerField(null=True, blank=True)
     
     # Qualifications
-    highest_degree = models.CharField(max_length=100)
-    major = models.CharField(max_length=100)
-    institution = models.CharField(max_length=200)
-    graduation_year = models.PositiveIntegerField()
+    highest_degree = models.CharField(max_length=100, null=True, blank=True)
+    major = models.CharField(max_length=100, null=True, blank=True)
+    institution = models.CharField(max_length=200, null=True, blank=True)
+    graduation_year = models.PositiveIntegerField(null=True, blank=True)
     
     # Additional Qualifications
-    certifications = models.TextField(blank=True)
-    skills = models.TextField(blank=True)
+    certifications = models.TextField(null=True, blank=True)
+    skills = models.TextField(null=True, blank=True)
     
     # Teaching Information
-    subjects_taught = models.TextField()
-    classes_assigned = models.TextField()
+    subjects_taught = models.TextField(null=True, blank=True)
+    classes_assigned = models.TextField(null=True, blank=True)
     
     # Emergency Contact
-    emergency_contact_name = models.CharField(max_length=100)
-    emergency_contact_relationship = models.CharField(max_length=50)
-    emergency_contact_phone = models.CharField(max_length=15)
+    emergency_contact_name = models.CharField(max_length=100, null=True, blank=True)
+    emergency_contact_relationship = models.CharField(max_length=50, null=True, blank=True)
+    emergency_contact_phone = models.CharField(max_length=15, null=True, blank=True)
     
     # Additional Information
-    bio = models.TextField(blank=True)
-    achievements = models.TextField(blank=True)
+    bio = models.TextField(null=True, blank=True)
+    achievements = models.TextField(null=True, blank=True)
     
     # System Fields
     delete_status = models.BooleanField(default=False)
@@ -207,6 +207,55 @@ class Teacher(models.Model):
         self.delete_status = True
         self.save()
 
+class AcademicYear(models.Model):
+    name = models.CharField(max_length=9, unique=True, null=True, blank=True)  # e.g., "2023-2024"
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='academic_years_created')
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='academic_years_updated')
+    delete_status = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+    def clean(self):
+        if self.start_date >= self.end_date:
+            raise ValidationError("End date must be after start date.")
+
+class Term(models.Model):
+    TERM_CHOICES = [
+        ('1', 'First Term'),
+        ('2', 'Middle Term'),
+        ('3', 'Final Term'),
+    ]
+    
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='terms', null=True, blank=True)
+    name = models.CharField(max_length=1, choices=TERM_CHOICES, null=True, blank=True)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='terms_created')
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='terms_updated')
+    delete_status = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ['academic_year', 'name']
+        ordering = ['academic_year', 'name']
+
+    def __str__(self):
+        return f"{self.get_name_display()} - {self.academic_year}"
+
+    def clean(self):
+        if self.start_date >= self.end_date:
+            raise ValidationError("End date must be after start date.")
+        if self.start_date < self.academic_year.start_date or self.end_date > self.academic_year.end_date:
+            raise ValidationError("Term dates must be within the academic year.")
+
 class Class(models.Model):
     GRADE_CHOICES = [
         ('1', 'Year 1'),
@@ -224,13 +273,13 @@ class Class(models.Model):
         ('D', 'D'),
     ]
 
-    name = models.CharField(max_length=50, unique=True)
-    grade = models.CharField(max_length=1, choices=GRADE_CHOICES)
-    section = models.CharField(max_length=1, choices=SECTION_CHOICES)
-    head_teacher = models.ForeignKey('Teacher', on_delete=models.SET_NULL, null=True, related_name='headed_classes')
-    students = models.ManyToManyField('Student', related_name='classes')
-    capacity = models.PositiveIntegerField(default=30)
-    academic_year = models.CharField(max_length=9)  # e.g., "2023-2024"
+    name = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    grade = models.CharField(max_length=1, choices=GRADE_CHOICES, null=True, blank=True)
+    section = models.CharField(max_length=1, choices=SECTION_CHOICES, null=True, blank=True)
+    head_teacher = models.ForeignKey('Teacher', on_delete=models.SET_NULL, null=True, blank=True, related_name='headed_classes')
+    students = models.ManyToManyField('Student', related_name='classes', null=True, blank=True)
+    capacity = models.PositiveIntegerField(default=30, null=True, blank=True)
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, null=True, blank=True, related_name='classes')
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -246,9 +295,9 @@ class Class(models.Model):
         return f"Year {self.grade} Grade {self.section} - {self.academic_year}"
 
 class Subject(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    code = models.CharField(max_length=10, unique=True)
-    description = models.TextField(blank=True)
+    name = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    code = models.CharField(max_length=10, unique=True, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -260,10 +309,11 @@ class Subject(models.Model):
         return self.name
 
 class ClassSubject(models.Model):
-    class_group = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='class_subjects')
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='class_subjects')
-    teacher = models.ForeignKey('Teacher', on_delete=models.SET_NULL, null=True, related_name='taught_subjects')
-    schedule = models.TextField()  # This could be JSON data representing the class schedule
+    class_group = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='class_subjects', null=True, blank=True)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='class_subjects', null=True, blank=True)
+    teacher = models.ForeignKey('Teacher', on_delete=models.SET_NULL, null=True, related_name='taught_subjects', blank=True)
+    term = models.ForeignKey(Term, on_delete=models.CASCADE, related_name='class_subjects', null=True, blank=True)
+    schedule = models.TextField(null=True, blank=True)  # This could be JSON data representing the class schedule
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -272,10 +322,10 @@ class ClassSubject(models.Model):
     delete_status = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ['class_group', 'subject']
+        unique_together = ['class_group', 'subject', 'term']
 
     def __str__(self):
-        return f"{self.class_group} - {self.subject}"
+        return f"{self.class_group} - {self.subject} - {self.term}"
 
 class Attendance(models.Model):
     ATTENDANCE_CHOICES = [
@@ -285,11 +335,11 @@ class Attendance(models.Model):
         ('excused', 'Excused'),
     ]
 
-    student = models.ForeignKey('Student', on_delete=models.CASCADE, related_name='attendances')
-    class_subject = models.ForeignKey('ClassSubject', on_delete=models.CASCADE, related_name='attendances')
-    date = models.DateField()
-    status = models.CharField(max_length=10, choices=ATTENDANCE_CHOICES)
-    remarks = models.TextField(blank=True)
+    student = models.ForeignKey('Student', on_delete=models.CASCADE, related_name='attendances', null=True, blank=True)
+    class_subject = models.ForeignKey(ClassSubject, on_delete=models.CASCADE, related_name='attendances', null=True, blank=True)
+    date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=10, null=True, blank=True, choices=ATTENDANCE_CHOICES)
+    remarks = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='attendances_created')
@@ -299,13 +349,14 @@ class Attendance(models.Model):
         unique_together = ('student', 'class_subject', 'date')
 
     def clean(self):
-        # Check if the date is a weekday (Monday = 0, Sunday = 6)
         if self.date.weekday() > 4:
             raise ValidationError("Attendance can only be marked for weekdays (Monday to Friday).")
         
-        # Check if the date is not a holiday (you'll need to implement a Holiday model for this)
         if Holiday.objects.filter(date=self.date).exists():
             raise ValidationError("Attendance cannot be marked for a holiday.")
+
+        if not (self.class_subject.term.start_date <= self.date <= self.class_subject.term.end_date):
+            raise ValidationError("Attendance date must be within the term dates.")
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -315,9 +366,9 @@ class Attendance(models.Model):
         return f"{self.student.name} - {self.class_subject.subject.name} - {self.date}"
 
 class Holiday(models.Model):
-    name = models.CharField(max_length=100)
-    date = models.DateField(unique=True)
-    description = models.TextField(blank=True)
+    name = models.CharField(max_length=100, null=True, blank=True)
+    date = models.DateField(unique=True, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='holidays_created')
