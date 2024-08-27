@@ -36,4 +36,10 @@ urlpatterns = [
     path('academic-year/<int:id>/', viewAcademicYear, name='viewAcademicYear'),
     path('academic-year/<int:id>/edit/', editAcademicYear, name='editAcademicYear'),
     path('academic-year/<int:id>/delete/', deleteAcademicYear, name='deleteAcademicYear'),
+
+    path('classes/', getClasses, name='getClasses'),
+    path('class/add/', addClass, name='addClass'),
+    path('class/<int:id>/', viewClass, name='viewClass'),
+    path('class/<int:id>/edit/', editClass, name='editClass'),
+    path('class/<int:id>/delete/', deleteClass, name='deleteClass'),
 ]  + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
