@@ -4,9 +4,10 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.utils.text import slugify
-from django.contrib.auth import get_user_model
 from imagekit.processors import ResizeToFill
+from django.contrib.auth import get_user_model
 from imagekit.models import ProcessedImageField
+from django.core.exceptions import ValidationError
 
 User = get_user_model()
 
@@ -205,3 +206,125 @@ class Teacher(models.Model):
     def delete(self, *args, **kwargs):
         self.delete_status = True
         self.save()
+
+class Class(models.Model):
+    GRADE_CHOICES = [
+        ('1', 'Year 1'),
+        ('2', 'Year 2'),
+        ('3', 'Year 3'),
+        ('4', 'Year 4'),
+        ('5', 'Year 5'),
+        ('6', 'Year 6'),
+    ]
+    
+    SECTION_CHOICES = [
+        ('A', 'A'),
+        ('B', 'B'),
+        ('C', 'C'),
+        ('D', 'D'),
+    ]
+
+    name = models.CharField(max_length=50, unique=True)
+    grade = models.CharField(max_length=1, choices=GRADE_CHOICES)
+    section = models.CharField(max_length=1, choices=SECTION_CHOICES)
+    head_teacher = models.ForeignKey('Teacher', on_delete=models.SET_NULL, null=True, related_name='headed_classes')
+    students = models.ManyToManyField('Student', related_name='classes')
+    capacity = models.PositiveIntegerField(default=30)
+    academic_year = models.CharField(max_length=9)  # e.g., "2023-2024"
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='classes_created')
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='classes_updated')
+    delete_status = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name_plural = "Classes"
+        unique_together = ['grade', 'section', 'academic_year']
+
+    def __str__(self):
+        return f"Year {self.grade} Grade {self.section} - {self.academic_year}"
+
+class Subject(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    code = models.CharField(max_length=10, unique=True)
+    description = models.TextField(blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='subjects_created')
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='subjects_updated')
+    delete_status = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+class ClassSubject(models.Model):
+    class_group = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='class_subjects')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='class_subjects')
+    teacher = models.ForeignKey('Teacher', on_delete=models.SET_NULL, null=True, related_name='taught_subjects')
+    schedule = models.TextField()  # This could be JSON data representing the class schedule
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='class_subjects_created')
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='class_subjects_updated')
+    delete_status = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ['class_group', 'subject']
+
+    def __str__(self):
+        return f"{self.class_group} - {self.subject}"
+
+class Attendance(models.Model):
+    ATTENDANCE_CHOICES = [
+        ('present', 'Present'),
+        ('absent', 'Absent'),
+        ('late', 'Late'),
+        ('excused', 'Excused'),
+    ]
+
+    student = models.ForeignKey('Student', on_delete=models.CASCADE, related_name='attendances')
+    class_subject = models.ForeignKey('ClassSubject', on_delete=models.CASCADE, related_name='attendances')
+    date = models.DateField()
+    status = models.CharField(max_length=10, choices=ATTENDANCE_CHOICES)
+    remarks = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='attendances_created')
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='attendances_updated')
+
+    class Meta:
+        unique_together = ('student', 'class_subject', 'date')
+
+    def clean(self):
+        # Check if the date is a weekday (Monday = 0, Sunday = 6)
+        if self.date.weekday() > 4:
+            raise ValidationError("Attendance can only be marked for weekdays (Monday to Friday).")
+        
+        # Check if the date is not a holiday (you'll need to implement a Holiday model for this)
+        if Holiday.objects.filter(date=self.date).exists():
+            raise ValidationError("Attendance cannot be marked for a holiday.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.student.name} - {self.class_subject.subject.name} - {self.date}"
+
+class Holiday(models.Model):
+    name = models.CharField(max_length=100)
+    date = models.DateField(unique=True)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='holidays_created')
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='holidays_updated')
+
+    def __str__(self):
+        return f"{self.name} - {self.date}"
+
+    class Meta:
+        ordering = ['date']
