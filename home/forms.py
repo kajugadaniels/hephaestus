@@ -110,3 +110,14 @@ class TeacherForm(forms.ModelForm):
             'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Optional'}),
             'achievements': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Optional'}),
         }
+
+class TermForm(forms.ModelForm):
+    class Meta:
+        model = Term
+        fields = ['academic_year', 'name', 'start_date', 'end_date']
+        widgets = {
+            'academic_year': forms.Select(attrs={'class': 'form-control select2', 'required': 'true'}),
+            'name': forms.Select(attrs={'class': 'form-control select2', 'required': 'true'}),
+            'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': 'true'}),
+            'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': 'true'}),
+        }

@@ -24,4 +24,10 @@ urlpatterns = [
     path('teacher/<str:employee_id>/', viewTeacher, name='viewTeacher'),
     path('teacher/<str:employee_id>/edit/', editTeacher, name='editTeacher'),
     path('teacher/<str:employee_id>/delete/', deleteTeacher, name='deleteTeacher'),
+
+    path('terms/', getTerms, name='getTerms'),
+    path('term/add/', addTerm, name='addTerm'),
+    path('term/<int:id>/', viewTerm, name='viewTerm'),
+    path('term/<int:id>/edit/', editTerm, name='editTerm'),
+    path('term/<int:id>/delete/', deleteTerm, name='deleteTerm'),
 ]  + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

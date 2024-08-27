@@ -201,3 +201,72 @@ def deleteTeacher(request, employee_id):
     teacher.save()
     messages.success(request, 'Teacher deleted successfully.')
     return redirect('home:getTeachers')
+
+@login_required
+def getTerms(request):
+    terms = Term.objects.filter(delete_status=False).order_by('-created_at')
+
+    context = {
+        'terms': terms
+    }
+
+    return render(request, 'pages/terms/index.html', context)
+
+@login_required
+def addTerm(request):
+    if request.method == 'POST':
+        form = TermForm(request.POST)
+        if form.is_valid():
+            term = form.save(commit=False)
+            term.created_by = request.user
+            term.save()
+            messages.success(request, 'Term added successfully.')
+            return redirect('home:getTerms')
+    else:
+        form = TermForm()
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'pages/terms/create.html', context)
+
+@login_required
+def viewTerm(request, id):
+    term = get_object_or_404(Term, id=id, delete_status=False)
+
+    context = {
+        'term': term
+    }
+
+    return render(request, 'pages/terms/show.html', context)
+
+@login_required
+def editTerm(request, id):
+    term = get_object_or_404(Term, id=id, delete_status=False)
+    if request.method == 'POST':
+        form = TermForm(request.POST, instance=term)
+        if form.is_valid():
+            term = form.save(commit=False)
+            term.updated_by = request.user
+            term.save()
+            messages.success(request, 'Term updated successfully.')
+            return redirect('home:viewTerm', id=term.id)
+    else:
+        form = TermForm(instance=term)
+
+    context = {
+        'form': form,
+        'term': term
+    }
+
+    return render(request, 'pages/terms/edit.html', context)
+
+@login_required
+def deleteTerm(request, id):
+    term = get_object_or_404(Term, id=id, delete_status=False)
+    term.delete_status = True
+    term.updated_by = request.user
+    term.save()
+    messages.success(request, 'Term deleted successfully.')
+    return redirect('home:getTerms')
