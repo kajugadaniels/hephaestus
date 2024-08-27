@@ -305,9 +305,11 @@ def addAcademicYear(request):
 @login_required
 def viewAcademicYear(request, id):
     academic_year = get_object_or_404(AcademicYear, id=id, delete_status=False)
+    classes = Class.objects.filter(academic_year=academic_year, delete_status=False)
 
     context = {
-        'academic_year': academic_year
+        'academic_year': academic_year,
+        'classes': classes,
     }
 
     return render(request, 'pages/academicYears/show.html', context)

@@ -7,12 +7,12 @@
         <div class="ms-md-1 ms-0">
             <nav>
                 <ol class="breadcrumb mb-0">
-                    <a class="btn btn-primary me-2" href="{% url 'home:getClasses' %}">
-                        <i class="fas fa-arrow-left me-2"></i>Back to Classes
+                    <a class="btn btn-primary me-2" href="{% url 'home:getAcademicYears' %}">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Academic Years
                     </a>
-                    <a class="btn btn-warning" href="{% url 'home:editClass' class.id %}">
+                    {% comment %} <a class="btn btn-warning" href="{% url 'home:editClass' class.id %}">
                         <i class="fas fa-edit me-2"></i>Edit Class
-                    </a>
+                    </a> {% endcomment %}
                 </ol>
             </nav>
         </div>
