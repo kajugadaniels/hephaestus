@@ -348,7 +348,7 @@ def getClasses(request):
         'classes': classes
     }
 
-    return render(request, 'classes/index.html', context)
+    return render(request, 'pages/classes/index.html', context)
 
 @login_required
 def addClass(request):
@@ -368,7 +368,7 @@ def addClass(request):
         'form': form
     }
 
-    return render(request, 'classes/create.html', context)
+    return render(request, 'pages/classes/create.html', context)
 
 @login_required
 def viewClass(request, id):
@@ -378,7 +378,7 @@ def viewClass(request, id):
         'class': class_obj
     }
 
-    return render(request, 'classes/show.html', context)
+    return render(request, 'pages/classes/show.html', context)
 
 @login_required
 def editClass(request, id):
@@ -400,7 +400,7 @@ def editClass(request, id):
         'class': class_obj
     }
 
-    return render(request, 'classes/edit.html', context)
+    return render(request, 'pages/classes/edit.html', context)
 
 @login_required
 def deleteClass(request, id):
