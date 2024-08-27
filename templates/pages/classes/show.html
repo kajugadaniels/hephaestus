@@ -1,0 +1,80 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
+        <h1 class="page-title fw-semibold fs-18 mb-0">Class Details</h1>
+        <div class="ms-md-1 ms-0">
+            <nav>
+                <ol class="breadcrumb mb-0">
+                    <a class="btn btn-primary me-2" href="{% url 'home:getClasses' %}">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Classes
+                    </a>
+                    <a class="btn btn-warning" href="{% url 'home:editClass' class.id %}">
+                        <i class="fas fa-edit me-2"></i>Edit Class
+                    </a>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <h2>{{ class.name }}</h2>
+                    <div class="d-flex justify-content-between">
+                        <p><strong>Grade:</strong> {{ class.get_grade_display }}</p>
+                        <p><strong>Section:</strong> {{ class.get_section_display }}</p>
+                        <p><strong>Head Teacher:</strong> {{ class.head_teacher.name }}</p>
+                        <p><strong>Capacity:</strong> {{ class.capacity }}</p>
+                        <p><strong>Academic Year:</strong> {{ class.academic_year.name }}</p>
+                    </div>
+                    <h3 class="mt-4">Students</h3>
+                    <div class="table-responsive">
+                        <table id="datatable" class="table table-bordered text-nowrap w-100">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Roll ID</th>
+                                    <th>Age</th>
+                                    <th>Gender</th>
+                                    <th>Current Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in class.students.all %}
+                                    <tr>
+                                        <td>{{ student.name }}</td>
+                                        <td>{{ student.roll_id }}</td>
+                                        <td>{{ student.age }}</td>
+                                        <td>{{ student.gender }}</td>
+                                        <td>
+                                            {% if student.current_status == 'Active' %}
+                                                <span class="badge bg-success">{{ student.current_status }}</span>
+                                            {% elif student.current_status == 'Graduated' %}
+                                                <span class="badge bg-primary">{{ student.current_status }}</span>
+                                            {% elif student.current_status == 'Transferred' %}
+                                                <span class="badge bg-warning text-dark">{{ student.current_status }}</span>
+                                            {% elif student.current_status == 'Dropped' %}
+                                                <span class="badge bg-danger">{{ student.current_status }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ student.current_status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'home:viewStudent' student.slug %}" class="btn btn-sm btn-info">View</a>
+                                            <a href="{% url 'home:editStudent' student.slug %}" class="btn btn-sm btn-warning">Edit</a>
+                                            <a href="{% url 'home:deleteStudent' student.slug %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this student?')">Delete</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
