@@ -1,5 +1,5 @@
-from home.models import *
 from django.contrib import admin
+from home.models import *
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
@@ -19,11 +19,10 @@ class StudentAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at')
     
     def save_model(self, request, obj, form, change):
-        # Optionally customize save behavior, e.g., setting additional fields
         super().save_model(request, obj, form, change)
 
     def get_readonly_fields(self, request, obj=None):
-        if obj:  # Editing an existing student
+        if obj:
             return self.readonly_fields + ('slug',)
         return self.readonly_fields
 
@@ -31,3 +30,62 @@ class StudentAdmin(admin.ModelAdmin):
         return obj.age
     age.admin_order_field = 'dob'
     age.short_description = 'Age'
+
+@admin.register(Teacher)
+class TeacherAdmin(admin.ModelAdmin):
+    list_display = ('name', 'employee_id', 'position', 'department', 'employment_status', 'date_joined', 'delete_status')
+    search_fields = ('user__name', 'employee_id', 'position', 'department', 'subjects_taught')
+    list_filter = ('gender', 'employment_status', 'delete_status', 'date_joined')
+    readonly_fields = ('created_at', 'updated_at')
+
+    def name(self, obj):
+        return obj.user.name
+
+@admin.register(AcademicYear)
+class AcademicYearAdmin(admin.ModelAdmin):
+    list_display = ('name', 'start_date', 'end_date', 'delete_status')
+    search_fields = ('name',)
+    list_filter = ('delete_status',)
+    readonly_fields = ('created_at', 'updated_at')
+
+@admin.register(Term)
+class TermAdmin(admin.ModelAdmin):
+    list_display = ('name', 'academic_year', 'start_date', 'end_date', 'delete_status')
+    search_fields = ('name', 'academic_year__name')
+    list_filter = ('academic_year', 'delete_status')
+    readonly_fields = ('created_at', 'updated_at')
+
+@admin.register(Class)
+class ClassAdmin(admin.ModelAdmin):
+    list_display = ('name', 'grade', 'section', 'head_teacher', 'capacity', 'academic_year', 'delete_status')
+    search_fields = ('name', 'grade', 'section', 'head_teacher__user__name')
+    list_filter = ('grade', 'academic_year', 'delete_status')
+    readonly_fields = ('created_at', 'updated_at')
+
+@admin.register(Subject)
+class SubjectAdmin(admin.ModelAdmin):
+    list_display = ('name', 'code', 'delete_status')
+    search_fields = ('name', 'code')
+    list_filter = ('delete_status',)
+    readonly_fields = ('created_at', 'updated_at')
+
+@admin.register(ClassSubject)
+class ClassSubjectAdmin(admin.ModelAdmin):
+    list_display = ('class_group', 'subject', 'teacher', 'term', 'delete_status')
+    search_fields = ('class_group__name', 'subject__name', 'teacher__user__name')
+    list_filter = ('term', 'delete_status')
+    readonly_fields = ('created_at', 'updated_at')
+
+@admin.register(Attendance)
+class AttendanceAdmin(admin.ModelAdmin):
+    list_display = ('student', 'class_subject', 'date', 'status')
+    search_fields = ('student__name', 'class_subject__subject__name')
+    list_filter = ('status', 'date')
+    readonly_fields = ('created_at', 'updated_at')
+
+@admin.register(Holiday)
+class HolidayAdmin(admin.ModelAdmin):
+    list_display = ('name', 'date')
+    search_fields = ('name',)
+    list_filter = ('date',)
+    readonly_fields = ('created_at', 'updated_at')
