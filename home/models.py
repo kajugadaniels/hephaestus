@@ -277,3 +277,54 @@ class ClassSubject(models.Model):
     def __str__(self):
         return f"{self.class_group} - {self.subject}"
 
+class Attendance(models.Model):
+    ATTENDANCE_CHOICES = [
+        ('present', 'Present'),
+        ('absent', 'Absent'),
+        ('late', 'Late'),
+        ('excused', 'Excused'),
+    ]
+
+    student = models.ForeignKey('Student', on_delete=models.CASCADE, related_name='attendances')
+    class_subject = models.ForeignKey('ClassSubject', on_delete=models.CASCADE, related_name='attendances')
+    date = models.DateField()
+    status = models.CharField(max_length=10, choices=ATTENDANCE_CHOICES)
+    remarks = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='attendances_created')
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='attendances_updated')
+
+    class Meta:
+        unique_together = ('student', 'class_subject', 'date')
+
+    def clean(self):
+        # Check if the date is a weekday (Monday = 0, Sunday = 6)
+        if self.date.weekday() > 4:
+            raise ValidationError("Attendance can only be marked for weekdays (Monday to Friday).")
+        
+        # Check if the date is not a holiday (you'll need to implement a Holiday model for this)
+        if Holiday.objects.filter(date=self.date).exists():
+            raise ValidationError("Attendance cannot be marked for a holiday.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.student.name} - {self.class_subject.subject.name} - {self.date}"
+
+class Holiday(models.Model):
+    name = models.CharField(max_length=100)
+    date = models.DateField(unique=True)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='holidays_created')
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='holidays_updated')
+
+    def __str__(self):
+        return f"{self.name} - {self.date}"
+
+    class Meta:
+        ordering = ['date']
