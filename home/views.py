@@ -450,34 +450,43 @@ def editClass(request, id):
     
     if request.method == 'POST':
         form = ClassForm(request.POST, instance=class_obj)
-        if form.is_valid():
-            updated_class = form.save(commit=False)
-            updated_class.updated_by = request.user
-            updated_class.save()
-            
-            # Handle students separately
-            student_ids = request.POST.getlist('students')
-            available_students = Student.objects.filter(
-                id__in=student_ids,
-                delete_status=False,
-                current_status='Active'
-            ).exclude(
-                Exists(
-                    Class.objects.filter(
-                        academic_year=class_obj.academic_year,
-                        students=OuterRef('pk')
-                    ).exclude(pk=class_obj.pk)
+        try:
+            if form.is_valid():
+                updated_class = form.save(commit=False)
+                updated_class.updated_by = request.user
+                updated_class.save()
+                
+                # Handle students separately
+                student_ids = request.POST.getlist('students')
+                available_students = Student.objects.filter(
+                    id__in=student_ids,
+                    delete_status=False,
+                    current_status='Active'
+                ).exclude(
+                    Exists(
+                        Class.objects.filter(
+                            academic_year=class_obj.academic_year,
+                            students=OuterRef('pk')
+                        ).exclude(pk=class_obj.pk)
+                    )
                 )
-            )
-            
-            updated_class.students.set(available_students)
-            updated_class.capacity = available_students.count()
-            updated_class.save()
-            
-            messages.success(request, 'Class updated successfully.')
-            return redirect('home:viewClass', id=updated_class.id)
-        else:
-            messages.error(request, 'Please correct the errors below.')
+                
+                updated_class.students.set(available_students)
+                updated_class.capacity = available_students.count()
+                updated_class.save()
+                
+                messages.success(request, 'Class updated successfully.')
+                return redirect('home:viewClass', id=updated_class.id)
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field.capitalize()}: {error}")
+        except IntegrityError:
+            messages.error(request, 'A class with the same grade, section, and academic year already exists.')
+        except ValidationError as e:
+            messages.error(request, f"Validation error: {e}")
+        except Exception as e:
+            messages.error(request, f"An unexpected error occurred: {e}")
     else:
         form = ClassForm(instance=class_obj)
     
