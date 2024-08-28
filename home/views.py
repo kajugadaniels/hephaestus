@@ -447,23 +447,66 @@ def viewClass(request, id):
 @login_required
 def editClass(request, id):
     class_obj = get_object_or_404(Class, id=id, delete_status=False)
+    
     if request.method == 'POST':
         form = ClassForm(request.POST, instance=class_obj)
         if form.is_valid():
-            class_obj = form.save(commit=False)
-            class_obj.updated_by = request.user
-            class_obj.save()
-            form.save_m2m()  # Save many-to-many relationships
+            updated_class = form.save(commit=False)
+            updated_class.updated_by = request.user
+            updated_class.save()
+            
+            # Handle students separately
+            student_ids = request.POST.getlist('students')
+            available_students = Student.objects.filter(
+                id__in=student_ids,
+                delete_status=False,
+                current_status='Active'
+            ).exclude(
+                Exists(
+                    Class.objects.filter(
+                        academic_year=class_obj.academic_year,
+                        students=OuterRef('pk')
+                    ).exclude(pk=class_obj.pk)
+                )
+            )
+            
+            updated_class.students.set(available_students)
+            updated_class.capacity = available_students.count()
+            updated_class.save()
+            
             messages.success(request, 'Class updated successfully.')
-            return redirect('home:viewClass', id=class_obj.id)
+            return redirect('home:viewClass', id=updated_class.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = ClassForm(instance=class_obj)
-
+    
+    # Fetch students not assigned to any class in the current academic year (excluding this class)
+    students = Student.objects.filter(
+        delete_status=False,
+        current_status='Active'
+    ).exclude(
+        Exists(
+            Class.objects.filter(
+                academic_year=class_obj.academic_year,
+                students=OuterRef('pk')
+            ).exclude(pk=class_obj.pk)
+        )
+    )
+    
+    # Add currently assigned students to the queryset
+    students = students.union(class_obj.students.all())
+    
+    headTeachers = Teacher.objects.filter(delete_status=False).order_by('-created_at')
+    
     context = {
         'form': form,
-        'class': class_obj
+        'class': class_obj,
+        'students': students,
+        'headTeachers': headTeachers,
+        'academic_year': class_obj.academic_year,
     }
-
+    
     return render(request, 'pages/classes/edit.html', context)
 
 @login_required

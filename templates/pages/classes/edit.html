@@ -1,0 +1,93 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
+        <h1 class="page-title fw-semibold fs-18 mb-0">Edit Class</h1>
+        <div class="ms-md-1 ms-0">
+            <nav>
+                <ol class="breadcrumb mb-0">
+                    <a class="btn btn-primary" href="{% url 'home:viewClass' class.id %}">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Class Details
+                    </a>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
+                                {{ form.name }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.grade.id_for_label }}" class="form-label">Grade</label>
+                                {{ form.grade }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.section.id_for_label }}" class="form-label">Section</label>
+                                {{ form.section }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="head_teacher" class="form-label">Head Teacher</label>
+                                <select class="form-control" name="head_teacher" id="choices-multiple-remove-button">
+                                    {% for teacher in headTeachers %}
+                                        <option value="{{ teacher.id }}" {% if teacher.id == class.head_teacher.id %}selected{% endif %}>
+                                            {{ teacher.user.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.capacity.id_for_label }}" class="form-label">Capacity</label>
+                                <input type="number" id="id_capacity" name="capacity" class="form-control" value="{{ class.capacity }}" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.academic_year.id_for_label }}" class="form-label">Academic Year</label>
+                                <select class="form-control" data-trigger name="academic_year" id="choices-multiple-default">
+                                    <option value="{{ academic_year.id }}" selected>{{ academic_year.name }}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <p class="fw-semibold mb-2">Students</p>
+                                <select class="form-control" name="students" id="choices-multiple-groups" multiple>
+                                    <option value="">Choose Students</option>
+                                    <optgroup>
+                                        {% for student in students %}
+                                            <option value="{{ student.id }}" {% if student in class.students.all %}selected{% endif %}>
+                                                {{ student.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </optgroup>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">Update Class</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var studentSelect = document.getElementById('choices-multiple-groups');
+        var capacityInput = document.getElementById('id_capacity');
+
+        function updateCapacity() {
+            capacityInput.value = studentSelect.selectedOptions.length;
+        }
+
+        studentSelect.addEventListener('change', updateCapacity);
+        updateCapacity(); // Initial update
+    });
+</script>
+{% endblock %}
