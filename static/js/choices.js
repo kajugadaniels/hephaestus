@@ -16,7 +16,10 @@
     /* multi select with option groups */
     const multipleDefault = new Choices(
         document.getElementById('choices-multiple-groups'),
-        { allowHTML: true }
+        {
+            allowHTML: true,
+            removeItemButton: true,
+        }
     );
 
     /* email address only */
