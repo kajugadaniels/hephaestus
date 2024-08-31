@@ -318,6 +318,23 @@ class Subject(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.code = self.generate_code()
+        super().save(*args, **kwargs)
+
+    def generate_code(self):
+        acronym = ''.join(word[0].upper() for word in self.name.split() if word)
+        number = ''.join(str(random.randint(0, 9)) for _ in range(4))
+        code = f"{acronym}{number}"
+        
+        # Check if code already exists and regenerate if necessary
+        while Subject.objects.filter(code=code).exists():
+            number = ''.join(str(random.randint(0, 9)) for _ in range(4))
+            code = f"{acronym}{number}"
+        
+        return code
+
 class ClassSubject(models.Model):
     class_group = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='class_subjects', null=True, blank=True)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='class_subjects', null=True, blank=True)
