@@ -338,9 +338,9 @@ class Subject(models.Model):
 class ClassSubject(models.Model):
     class_group = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='class_subjects', null=True, blank=True)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='class_subjects', null=True, blank=True)
-    teacher = models.ForeignKey('Teacher', on_delete=models.SET_NULL, null=True, related_name='taught_subjects', blank=True)
-    term = models.ForeignKey(Term, on_delete=models.CASCADE, related_name='class_subjects', null=True, blank=True)
-    schedule = models.TextField(null=True, blank=True)  # This could be JSON data representing the class schedule
+    teacher = models.ForeignKey('Teacher', on_delete=models.SET_NULL, related_name='taught_subjects', null=True, blank=True)
+    starting_hour = models.TimeField(null=True, blank=True)
+    ending_hour = models.TimeField(null=True, blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -349,10 +349,10 @@ class ClassSubject(models.Model):
     delete_status = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ['class_group', 'subject', 'term']
+        unique_together = ['class_group', 'subject']
 
     def __str__(self):
-        return f"{self.class_group} - {self.subject} - {self.term}"
+        return f"{self.class_group} - {self.subject}"
 
 class Attendance(models.Model):
     ATTENDANCE_CHOICES = [

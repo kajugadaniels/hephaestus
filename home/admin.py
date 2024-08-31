@@ -71,9 +71,9 @@ class SubjectAdmin(admin.ModelAdmin):
 
 @admin.register(ClassSubject)
 class ClassSubjectAdmin(admin.ModelAdmin):
-    list_display = ('class_group', 'subject', 'teacher', 'term', 'delete_status')
+    list_display = ('class_group', 'subject', 'teacher', 'starting_hour', 'ending_hour', 'delete_status')
     search_fields = ('class_group__name', 'subject__name', 'teacher__user__name')
-    list_filter = ('term', 'delete_status')
+    list_filter = ('delete_status',)
     readonly_fields = ('created_at', 'updated_at')
 
 @admin.register(Attendance)
