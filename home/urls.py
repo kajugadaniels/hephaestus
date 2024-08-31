@@ -42,4 +42,10 @@ urlpatterns = [
     path('class/<int:id>/', viewClass, name='viewClass'),
     path('class/<int:id>/edit/', editClass, name='editClass'),
     path('class/<int:id>/delete/', deleteClass, name='deleteClass'),
+
+    path('subjects/', getSubjects, name='getSubjects'),
+    path('subject/add/', addSubject, name='addSubject'),
+    path('subject/<int:id>/', viewSubject, name='viewSubject'),
+    path('subject/<int:id>/edit/', editSubject, name='editSubject'),
+    path('subject/<int:id>/delete/', deleteSubject, name='deleteSubject'),
 ]  + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
