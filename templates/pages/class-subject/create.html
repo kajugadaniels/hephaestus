@@ -1,6 +1,5 @@
 {% extends "layouts/app.html" %}
 {% load static %}
-
 {% block content %}
 <div class="container-fluid">
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
@@ -25,7 +24,7 @@
                             <div class="subject-field mb-3">
                                 <div class="row">
                                     <div class="col-md-3">
-                                        <select name="subjects[]" class="form-control subject-select" required>
+                                        <select name="subjects[]" class="form-control js-example-basic-single subject-select" required>
                                             <option value="">Select Subject</option>
                                             {% for subject in subjects %}
                                                 <option value="{{ subject.id }}">{{ subject.name }}</option>
@@ -33,10 +32,10 @@
                                         </select>
                                     </div>
                                     <div class="col-md-3">
-                                        <select name="teachers[]" class="form-control teacher-select" required>
+                                        <select name="teachers[]" class="form-control js-example-basic-single teacher-select" required>
                                             <option value="">Select Teacher</option>
                                             {% for teacher in teachers %}
-                                                <option value="{{ teacher.id }}">{{ teacher.name }}</option>
+                                                <option value="{{ teacher.id }}">{{ teacher.name }} ({{ teacher.department }})</option>
                                             {% endfor %}
                                         </select>
                                     </div>
@@ -62,61 +61,80 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const subjectFields = document.getElementById('subjectFields');
-    const addSubjectBtn = document.getElementById('addSubject');
-    const form = document.getElementById('assignSubjectsForm');
-
-    addSubjectBtn.addEventListener('click', function() {
-        const newField = subjectFields.children[0].cloneNode(true);
-        newField.querySelectorAll('select, input').forEach(el => el.value = '');
-        subjectFields.appendChild(newField);
-    });
-
-    subjectFields.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-subject')) {
-            if (subjectFields.children.length > 1) {
-                e.target.closest('.subject-field').remove();
-            }
-        }
-    });
-
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(form);
-        const subjects = [];
-
-        for (let i = 0; i < formData.getAll('subjects[]').length; i++) {
-            subjects.push([
-                formData.getAll('subjects[]')[i],
-                formData.getAll('teachers[]')[i],
-                formData.getAll('starting_hours[]')[i],
-                formData.getAll('ending_hours[]')[i]
-            ].join(','));
-        }
-
-        formData.delete('subjects[]');
-        formData.delete('teachers[]');
-        formData.delete('starting_hours[]');
-        formData.delete('ending_hours[]');
-
-        subjects.forEach(subject => formData.append('subjects[]', subject));
-
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-            }
-        }).then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = data.redirect_url;
-            } else {
-                alert('Error assigning subjects. Please try again.');
+    document.addEventListener('DOMContentLoaded', function() {
+        const subjectFields = document.getElementById('subjectFields');
+        const addSubjectBtn = document.getElementById('addSubject');
+        const form = document.getElementById('assignSubjectsForm');
+    
+        // Initialize Select2 for existing select elements
+        $('.js-example-basic-single').select2();
+    
+        addSubjectBtn.addEventListener('click', function() {
+            const newField = subjectFields.children[0].cloneNode(true);
+            newField.querySelectorAll('select, input').forEach(el => el.value = '');
+            subjectFields.appendChild(newField);
+            
+            // Initialize Select2 for new select elements
+            $(newField).find('.js-example-basic-single').select2();
+        });
+    
+        subjectFields.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-subject')) {
+                if (subjectFields.children.length > 1) {
+                    e.target.closest('.subject-field').remove();
+                }
             }
         });
+    
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const subjects = [];
+    
+            const subjectFields = document.querySelectorAll('.subject-field');
+            subjectFields.forEach(field => {
+                const subject = field.querySelector('.subject-select').value;
+                const teacher = field.querySelector('.teacher-select').value;
+                const startingHour = field.querySelector('input[name="starting_hours[]"]').value;
+                const endingHour = field.querySelector('input[name="ending_hours[]"]').value;
+    
+                if (subject && teacher && startingHour && endingHour) {
+                    subjects.push(`${subject},${teacher},${startingHour},${endingHour}`);
+                }
+            });
+    
+            formData.delete('subjects[]');
+            formData.delete('teachers[]');
+            formData.delete('starting_hours[]');
+            formData.delete('ending_hours[]');
+    
+            subjects.forEach(subject => formData.append('subjects[]', subject));
+    
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert(data.message || 'Error assigning subjects. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(`An error occurred: ${error.message}. Please try again.`);
+            });
+        });
     });
-});
 </script>
 {% endblock %}

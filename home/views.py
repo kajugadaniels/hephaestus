@@ -1,6 +1,7 @@
 from home.forms import *
 from home.models import *
 from account.models import *
+from django.urls import reverse
 from django.conf import settings
 from django.contrib import messages
 from django.http import JsonResponse
@@ -9,6 +10,7 @@ from django.db.models import Exists, OuterRef
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
 from django.shortcuts import render, redirect, get_object_or_404
 
 @login_required
@@ -610,22 +612,38 @@ def deleteSubject(request, id):
     return redirect('home:getSubjects')
 
 @login_required
+@require_http_methods(["GET", "POST"])
 def assignSubjects(request, class_id):
     class_obj = get_object_or_404(Class, id=class_id, delete_status=False)
     if request.method == 'POST':
         subjects_data = request.POST.getlist('subjects[]')
-        for subject_data in subjects_data:
-            subject_id, teacher_id, starting_hour, ending_hour = subject_data.split(',')
-            ClassSubject.objects.create(
-                class_group=class_obj,
-                subject_id=subject_id,
-                teacher_id=teacher_id,
-                starting_hour=starting_hour,
-                ending_hour=ending_hour,
-                created_by=request.user
-            )
-        messages.success(request, 'Subjects assigned successfully.')
-        return redirect('home:viewClass', class_id=class_id)
+        try:
+            for subject_data in subjects_data:
+                subject_id, teacher_id, starting_hour, ending_hour = subject_data.split(',')
+                ClassSubject.objects.create(
+                    class_group=class_obj,
+                    subject_id=subject_id,
+                    teacher_id=teacher_id,
+                    starting_hour=starting_hour,
+                    ending_hour=ending_hour,
+                    created_by=request.user
+                )
+            messages.success(request, 'Subjects assigned successfully.')
+            return JsonResponse({
+                'success': True, 
+                'message': 'Subjects assigned successfully.', 
+                'redirect_url': reverse('home:getClassSubjects', args=[class_id])
+            })
+        except IntegrityError as e:
+            return JsonResponse({
+                'success': False, 
+                'message': f'Error: {str(e)}. This might be due to a duplicate subject assignment.'
+            }, status=400)
+        except Exception as e:
+            return JsonResponse({
+                'success': False, 
+                'message': f'An unexpected error occurred: {str(e)}'
+            }, status=500)
     
     subjects = Subject.objects.filter(delete_status=False)
     teachers = Teacher.objects.filter(delete_status=False)

@@ -164,11 +164,15 @@ class SubjectForm(forms.ModelForm):
 class ClassSubjectForm(forms.ModelForm):
     class Meta:
         model = ClassSubject
-        fields = ['class_group', 'subject', 'teacher', 'starting_hour', 'ending_hour']
+        fields = ['subject', 'teacher', 'starting_hour', 'ending_hour']
         widgets = {
-            'class_group': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
-            'subject': forms.Select(attrs={'class': 'form-control', 'required': 'true'}),
-            'teacher': forms.Select(attrs={'class': 'form-control', 'required': 'true'}),
-            'starting_hour': forms.TimeInput(attrs={'class': 'form-control', 'required': 'true', 'type': 'time'}),
-            'ending_hour': forms.TimeInput(attrs={'class': 'form-control', 'required': 'true', 'type': 'time'}),
+            'subject': forms.Select(attrs={'class': 'form-control js-example-basic-single'}),
+            'teacher': forms.Select(attrs={'class': 'form-control js-example-basic-single'}),
+            'starting_hour': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'ending_hour': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(ClassSubjectForm, self).__init__(*args, **kwargs)
+        self.fields['subject'].queryset = Subject.objects.filter(delete_status=False)
+        self.fields['teacher'].queryset = Teacher.objects.filter(delete_status=False)
