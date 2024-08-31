@@ -637,3 +637,13 @@ def assignSubjects(request, class_id):
     }
 
     return render(request, 'pages/class-subject/create.html', context)
+
+@login_required
+def getClassSubjects(request):
+    class_subjects = ClassSubject.objects.filter(delete_status=False).order_by('-starting_hour')
+
+    context = {
+        'class_subjects': class_subjects
+    }
+
+    return render(request, 'pages/class-subject/index.html', context)
