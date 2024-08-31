@@ -647,3 +647,23 @@ def getClassSubjects(request, class_id):
     }
 
     return render(request, 'pages/class-subject/index.html', context)
+
+@login_required
+def editClassSubject(request, id):
+    class_subject = get_object_or_404(ClassSubject, id=id, delete_status=False)
+    if request.method == 'POST':
+        form = ClassSubjectForm(request.POST, instance=class_subject)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Class subject updated successfully.')
+            return redirect('home:getClassSubjects', class_id=class_subject.class_group.id)
+    else:
+        form = ClassSubjectForm(instance=class_subject)
+
+    context = {
+        'form': form,
+        'class_subject': class_subject
+    }
+
+    return render(request, 'pages/class-subject/edit.html', context)
+
