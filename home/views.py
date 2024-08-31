@@ -274,8 +274,21 @@ def deleteTerm(request, id):
     return redirect('home:getTerms')
 
 @login_required
+@login_required
 def getAcademicYears(request):
-    academic_years = AcademicYear.objects.filter(delete_status=False)
+    academic_years = AcademicYear.objects.filter(delete_status=False).order_by('-created_at')
+    today = timezone.now().date()
+
+    for year in academic_years:
+        if year.start_date and year.end_date:
+            if today < year.start_date:
+                year.status = "Not Started"
+            elif year.start_date <= today <= year.end_date:
+                year.status = "Ongoing"
+            else:
+                year.status = "Finished"
+        else:
+            year.status = "Dates not set"
 
     context = {
         'academic_years': academic_years
