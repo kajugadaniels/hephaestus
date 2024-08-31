@@ -539,3 +539,13 @@ def deleteClass(request, id):
     class_obj.save()
     messages.success(request, 'Class deleted successfully.')
     return redirect('home:getClasses')
+
+@login_required
+def getSubjects(request):
+    subjects = Subject.objects.filter(delete_status=False)
+
+    context = {
+        {'subjects': subjects}
+    }
+
+    return render(request, 'pages/subjects/index.html', context)
