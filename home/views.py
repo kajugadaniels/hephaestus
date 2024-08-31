@@ -542,7 +542,7 @@ def deleteClass(request, id):
 
 @login_required
 def getSubjects(request):
-    subjects = Subject.objects.filter(delete_status=False)
+    subjects = Subject.objects.filter(delete_status=False).order_by('-created_at')
 
     context = {
         {'subjects': subjects}
@@ -568,3 +568,13 @@ def addSubject(request):
     }
 
     return render(request, 'pages/subjects/create.html', context)
+
+@login_required
+def viewSubject(request, id):
+    subject = get_object_or_404(Subject, id=id, delete_status=False)
+
+    context = {
+        'subject': subject
+    }
+
+    return render(request, 'pages/subjects/show.html', context)
