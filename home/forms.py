@@ -161,3 +161,14 @@ class SubjectForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
+class ClassSubjectForm(forms.ModelForm):
+    class Meta:
+        model = ClassSubject
+        fields = ['class_group', 'subject', 'teacher', 'starting_hour', 'ending_hour']
+        widgets = {
+            'class_group': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'subject': forms.Select(attrs={'class': 'form-control', 'required': 'true'}),
+            'teacher': forms.Select(attrs={'class': 'form-control', 'required': 'true'}),
+            'starting_hour': forms.TimeInput(attrs={'class': 'form-control', 'required': 'true', 'type': 'time'}),
+            'ending_hour': forms.TimeInput(attrs={'class': 'form-control', 'required': 'true', 'type': 'time'}),
+        }
