@@ -599,3 +599,12 @@ def editSubject(request, id):
     }
 
     return render(request, 'pages/subjects/edit.html', context)
+
+@login_required
+def deleteSubject(request, id):
+    subject = get_object_or_404(Subject, id=id, delete_status=False)
+    subject.delete_status = True
+    subject.updated_by = request.user
+    subject.save()
+    messages.success(request, 'Subject deleted successfully.')
+    return redirect('home:getSubjects')
