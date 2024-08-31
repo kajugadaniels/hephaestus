@@ -549,3 +549,22 @@ def getSubjects(request):
     }
 
     return render(request, 'pages/subjects/index.html', context)
+
+@login_required
+def addSubject(request):
+    if request.method == 'POST':
+        form = SubjectForm(request.POST)
+        if form.is_valid():
+            subject = form.save(commit=False)
+            subject.created_by = request.user
+            subject.save()
+            messages.success(request, 'Subject added successfully.')
+            return redirect('home:getSubjects')
+    else:
+        form = SubjectForm()
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'pages/subjects/create.html', context)
