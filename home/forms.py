@@ -152,3 +152,12 @@ class ClassForm(forms.ModelForm):
         self.fields['head_teacher'].queryset = Teacher.objects.filter(delete_status=False)
         self.fields['academic_year'].queryset = AcademicYear.objects.filter(delete_status=False)
 
+class SubjectForm(forms.ModelForm):
+    class Meta:
+        model = Subject
+        fields = ['name', 'description']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
