@@ -578,3 +578,24 @@ def viewSubject(request, id):
     }
 
     return render(request, 'pages/subjects/show.html', context)
+
+@login_required
+def editSubject(request, id):
+    subject = get_object_or_404(Subject, id=id, delete_status=False)
+    if request.method == 'POST':
+        form = SubjectForm(request.POST, instance=subject)
+        if form.is_valid():
+            subject = form.save(commit=False)
+            subject.updated_by = request.user
+            subject.save()
+            messages.success(request, 'Subject updated successfully.')
+            return redirect('home:viewSubject', id=subject.id)
+    else:
+        form = SubjectForm(instance=subject)
+
+    context = {
+        'form': form,
+        'subject': subject
+    }
+
+    return render(request, 'pages/subjects/edit.html', context)
