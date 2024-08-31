@@ -545,7 +545,7 @@ def getSubjects(request):
     subjects = Subject.objects.filter(delete_status=False).order_by('-created_at')
 
     context = {
-        {'subjects': subjects}
+        'subjects': subjects
     }
 
     return render(request, 'pages/subjects/index.html', context)
