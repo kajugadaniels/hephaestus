@@ -667,3 +667,10 @@ def editClassSubject(request, id):
 
     return render(request, 'pages/class-subject/edit.html', context)
 
+@login_required
+def deleteClassSubject(request, id):
+    class_subject = get_object_or_404(ClassSubject, id=id, delete_status=False)
+    class_subject.delete_status = True
+    class_subject.save()
+    messages.success(request, 'Class subject deleted successfully.')
+    return redirect('home:getClassSubjects', class_id=class_subject.class_group.id)
