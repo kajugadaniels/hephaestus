@@ -336,9 +336,20 @@ class Subject(models.Model):
         return code
 
 class ClassSubject(models.Model):
+    DAY_CHOICES = [
+        ('Monday', 'Monday'),
+        ('Tuesday', 'Tuesday'),
+        ('Wednesday', 'Wednesday'),
+        ('Thursday', 'Thursday'),
+        ('Friday', 'Friday'),
+        ('Saturday', 'Saturday'),
+        ('Sunday', 'Sunday'),
+    ]
+
     class_group = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='class_subjects', null=True, blank=True)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='class_subjects', null=True, blank=True)
     teacher = models.ForeignKey('Teacher', on_delete=models.SET_NULL, related_name='taught_subjects', null=True, blank=True)
+    day = models.CharField(max_length=10, choices=DAY_CHOICES, null=True, blank=True)
     starting_hour = models.TimeField(null=True, blank=True)
     ending_hour = models.TimeField(null=True, blank=True)
     
