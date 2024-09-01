@@ -166,11 +166,11 @@ class ClassSubjectForm(forms.ModelForm):
         model = ClassSubject
         fields = ['subject', 'teacher', 'day', 'starting_hour', 'ending_hour']
         widgets = {
-            'subject': forms.Select(attrs={'class': 'form-control js-example-basic-single'}),
-            'teacher': forms.Select(attrs={'class': 'form-control js-example-basic-single'}),
-            'day': forms.Select(attrs={'class': 'form-control js-example-basic-single'}),
-            'starting_hour': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
-            'ending_hour': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'subject': forms.Select(attrs={'class': 'form-control js-example-basic-single', 'required': 'true'}),
+            'teacher': forms.Select(attrs={'class': 'form-control js-example-basic-single', 'required': 'true'}),
+            'day': forms.Select(attrs={'class': 'form-control js-example-basic-single', 'required': 'true'}),
+            'starting_hour': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time', 'required': 'true'}),
+            'ending_hour': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time', 'required': 'true'}),
         }
 
     def __init__(self, *args, **kwargs):
