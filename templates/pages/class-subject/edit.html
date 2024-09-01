@@ -1,15 +1,14 @@
 {% extends "layouts/app.html" %}
 {% load static %}
-
 {% block content %}
 <div class="container-fluid">
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
-        <h1 class="page-title fw-semibold fs-18 mb-0">Modify Subjects to {{ class.name }}</h1>
+        <h1 class="page-title fw-semibold fs-18 mb-0">Edit Class Subject</h1>
         <div class="ms-md-1 ms-0">
             <nav>
                 <ol class="breadcrumb mb-0">
-                    <a class="btn btn-primary" href="{% url 'home:getClasses' %}">
-                        <i class="fas fa-arrow-left me-2"></i>Back to Classes
+                    <a class="btn btn-primary" href="{% url 'home:getClassSubjects' class_subject.class_group.id %}">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Class Subjects
                     </a>
                 </ol>
             </nav>
@@ -19,104 +18,60 @@
         <div class="col-xl-12">
             <div class="card custom-card">
                 <div class="card-body">
-                    <form id="modifySubjectsForm" method="post">
+                    <form id="editClassSubjectForm" method="post">
                         {% csrf_token %}
-                        <div id="subjectFields">
-                            <div class="subject-field mb-3">
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <select name="subjects[]" class="form-control subject-select" required>
-                                            <option value="">Select Subject</option>
-                                            {% for subject in subjects %}
-                                                <option value="{{ subject.id }}">{{ subject.name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <select name="teachers[]" class="form-control teacher-select" required>
-                                            <option value="">Select Teacher</option>
-                                            {% for teacher in teachers %}
-                                                <option value="{{ teacher.id }}">{{ teacher.name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <input type="time" name="starting_hours[]" class="form-control" required>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <input type="time" name="ending_hours[]" class="form-control" required>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <button type="button" class="btn btn-danger remove-subject">Remove</button>
-                                    </div>
-                                </div>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.subject.id_for_label }}" class="form-label">Subject</label>
+                                {{ form.subject }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.teacher.id_for_label }}" class="form-label">Teacher</label>
+                                {{ form.teacher }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.starting_hour.id_for_label }}" class="form-label">Starting Hour</label>
+                                {{ form.starting_hour }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.ending_hour.id_for_label }}" class="form-label">Ending Hour</label>
+                                {{ form.ending_hour }}
                             </div>
                         </div>
-                        <button type="button" id="addSubject" class="btn btn-secondary mt-3">Add Another Subject</button>
-                        <button type="submit" class="btn btn-primary mt-3">Assign Subjects</button>
+                        <button type="submit" class="btn btn-primary">Update Class Subject</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const subjectFields = document.getElementById('subjectFields');
-    const addSubjectBtn = document.getElementById('addSubject');
-    const form = document.getElementById('modifySubjectsForm');
+    $(document).ready(function() {
+        $('.js-example-basic-single').select2();
 
-    addSubjectBtn.addEventListener('click', function() {
-        const newField = subjectFields.children[0].cloneNode(true);
-        newField.querySelectorAll('select, input').forEach(el => el.value = '');
-        subjectFields.appendChild(newField);
-    });
+        $('#editClassSubjectForm').on('submit', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            var url = form.attr('action');
 
-    subjectFields.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-subject')) {
-            if (subjectFields.children.length > 1) {
-                e.target.closest('.subject-field').remove();
-            }
-        }
-    });
-
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(form);
-        const subjects = [];
-
-        for (let i = 0; i < formData.getAll('subjects[]').length; i++) {
-            subjects.push([
-                formData.getAll('subjects[]')[i],
-                formData.getAll('teachers[]')[i],
-                formData.getAll('starting_hours[]')[i],
-                formData.getAll('ending_hours[]')[i]
-            ].join(','));
-        }
-
-        formData.delete('subjects[]');
-        formData.delete('teachers[]');
-        formData.delete('starting_hours[]');
-        formData.delete('ending_hours[]');
-
-        subjects.forEach(subject => formData.append('subjects[]', subject));
-
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-            }
-        }).then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = data.redirect_url;
-            } else {
-                alert('Error assigning subjects. Please try again.');
-            }
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: form.serialize(),
+                success: function(data) {
+                    if (data.success) {
+                        alert(data.message);
+                        window.location.href = data.redirect_url;
+                    } else {
+                        alert('Error updating class subject. Please try again.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    var errorMessage = xhr.status + ': ' + xhr.statusText;
+                    alert('Error - ' + errorMessage);
+                }
+            });
         });
     });
-});
 </script>
 {% endblock %}
