@@ -616,24 +616,23 @@ def assignSubjects(request, class_id):
     class_obj = get_object_or_404(Class, id=class_id, delete_status=False)
     if request.method == 'POST':
         subjects_data = request.POST.getlist('subjects[]')
-        try:
-            for subject_data in subjects_data:
-                subject_id, teacher_id, day, starting_hour, ending_hour = subject_data.split(',')
-                ClassSubject.objects.create(
-                    class_group=class_obj,
-                    subject_id=subject_id,
-                    teacher_id=teacher_id,
-                    day=day,
-                    starting_hour=starting_hour,
-                    ending_hour=ending_hour,
-                    created_by=request.user
-                )
-            messages.success(request, 'Subjects assigned successfully.')
-            return redirect('home:getClassSubjects', class_id=class_id)
-        except IntegrityError as e:
-            messages.error(request, f'Error: {str(e)}. This might be due to a duplicate subject assignment.')
-        except Exception as e:
-            messages.error(request, f'An unexpected error occurred: {str(e)}')
+        for subject_data in subjects_data:
+            subject_id, teacher_id, day, starting_hour, ending_hour = subject_data.split(',')
+            ClassSubject.objects.create(
+                class_group=class_obj,
+                subject_id=subject_id,
+                teacher_id=teacher_id,
+                day=day,
+                starting_hour=starting_hour,
+                ending_hour=ending_hour,
+                created_by=request.user
+            )
+        messages.success(request, 'Subjects assigned successfully.')
+        return JsonResponse({
+            'success': True,
+            'message': 'Subjects assigned successfully.',
+            'redirect_url': reverse('home:getClassSubjects', args=[class_id])
+        })
     
     subjects = Subject.objects.filter(delete_status=False)
     teachers = Teacher.objects.filter(delete_status=False)
