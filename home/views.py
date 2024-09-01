@@ -612,18 +612,18 @@ def deleteSubject(request, id):
     return redirect('home:getSubjects')
 
 @login_required
-@require_http_methods(["GET", "POST"])
 def assignSubjects(request, class_id):
     class_obj = get_object_or_404(Class, id=class_id, delete_status=False)
     if request.method == 'POST':
         subjects_data = request.POST.getlist('subjects[]')
         try:
             for subject_data in subjects_data:
-                subject_id, teacher_id, starting_hour, ending_hour = subject_data.split(',')
+                subject_id, teacher_id, day, starting_hour, ending_hour = subject_data.split(',')
                 ClassSubject.objects.create(
                     class_group=class_obj,
                     subject_id=subject_id,
                     teacher_id=teacher_id,
+                    day=day,
                     starting_hour=starting_hour,
                     ending_hour=ending_hour,
                     created_by=request.user

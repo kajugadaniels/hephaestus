@@ -23,7 +23,7 @@
                         <div id="subjectFields">
                             <div class="subject-field mb-3">
                                 <div class="row">
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <select name="subjects[]" class="form-control js-example-basic-single subject-select" required>
                                             <option value="">Select Subject</option>
                                             {% for subject in subjects %}
@@ -31,12 +31,22 @@
                                             {% endfor %}
                                         </select>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <select name="teachers[]" class="form-control js-example-basic-single teacher-select" required>
                                             <option value="">Select Teacher</option>
                                             {% for teacher in teachers %}
                                                 <option value="{{ teacher.id }}">{{ teacher.name }} ({{ teacher.department }})</option>
                                             {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select name="days[]" class="form-control js-example-basic-single day-select" required>
+                                            <option value="">Select Day</option>
+                                            <option value="Monday">Monday</option>
+                                            <option value="Tuesday">Tuesday</option>
+                                            <option value="Wednesday">Wednesday</option>
+                                            <option value="Thursday">Thursday</option>
+                                            <option value="Friday">Friday</option>
                                         </select>
                                     </div>
                                     <div class="col-md-2">
@@ -95,16 +105,18 @@
             subjectFields.forEach(field => {
                 const subject = field.querySelector('.subject-select').value;
                 const teacher = field.querySelector('.teacher-select').value;
+                const day = field.querySelector('.day-select').value;
                 const startingHour = field.querySelector('input[name="starting_hours[]"]').value;
                 const endingHour = field.querySelector('input[name="ending_hours[]"]').value;
     
-                if (subject && teacher && startingHour && endingHour) {
-                    subjects.push(`${subject},${teacher},${startingHour},${endingHour}`);
+                if (subject && teacher && day && startingHour && endingHour) {
+                    subjects.push(`${subject},${teacher},${day},${startingHour},${endingHour}`);
                 }
             });
     
             formData.delete('subjects[]');
             formData.delete('teachers[]');
+            formData.delete('days[]');
             formData.delete('starting_hours[]');
             formData.delete('ending_hours[]');
     
