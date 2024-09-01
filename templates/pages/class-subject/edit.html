@@ -21,19 +21,23 @@
                     <form id="editClassSubjectForm" method="post">
                         {% csrf_token %}
                         <div class="row">
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="{{ form.subject.id_for_label }}" class="form-label">Subject</label>
                                 {{ form.subject }}
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="{{ form.teacher.id_for_label }}" class="form-label">Teacher</label>
                                 {{ form.teacher }}
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.day.id_for_label }}" class="form-label">Day</label>
+                                {{ form.day }}
+                            </div>
+                            <div class="col-md-4 mb-3">
                                 <label for="{{ form.starting_hour.id_for_label }}" class="form-label">Starting Hour</label>
                                 {{ form.starting_hour }}
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label for="{{ form.ending_hour.id_for_label }}" class="form-label">Ending Hour</label>
                                 {{ form.ending_hour }}
                             </div>
