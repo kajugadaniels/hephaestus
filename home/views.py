@@ -629,21 +629,11 @@ def assignSubjects(request, class_id):
                     created_by=request.user
                 )
             messages.success(request, 'Subjects assigned successfully.')
-            return JsonResponse({
-                'success': True, 
-                'message': 'Subjects assigned successfully.', 
-                'redirect_url': reverse('home:getClassSubjects', args=[class_id])
-            })
+            return redirect('home:getClassSubjects', class_id=class_id)
         except IntegrityError as e:
-            return JsonResponse({
-                'success': False, 
-                'message': f'Error: {str(e)}. This might be due to a duplicate subject assignment.'
-            }, status=400)
+            messages.error(request, f'Error: {str(e)}. This might be due to a duplicate subject assignment.')
         except Exception as e:
-            return JsonResponse({
-                'success': False, 
-                'message': f'An unexpected error occurred: {str(e)}'
-            }, status=500)
+            messages.error(request, f'An unexpected error occurred: {str(e)}')
     
     subjects = Subject.objects.filter(delete_status=False)
     teachers = Teacher.objects.filter(delete_status=False)
@@ -658,7 +648,7 @@ def assignSubjects(request, class_id):
 
 @login_required
 def getClassSubjects(request, class_id):
-    class_subjects = ClassSubject.objects.filter(class_group_id=class_id, delete_status=False)
+    class_subjects = ClassSubject.objects.filter(class_group_id=class_id, delete_status=False).order_by('-created_at')
 
     context = {
         'class_subjects': class_subjects
@@ -677,17 +667,9 @@ def editClassSubject(request, id):
             updated_class_subject.updated_by = request.user
             updated_class_subject.save()
             messages.success(request, 'Class subject updated successfully.')
-            return JsonResponse({
-                'success': True,
-                'message': 'Class subject updated successfully.',
-                'redirect_url': reverse('home:getClassSubjects', args=[class_subject.class_group.id])
-            })
+            return redirect('home:getClassSubjects', class_id=class_subject.class_group.id)
         else:
-            return JsonResponse({
-                'success': False,
-                'message': 'Form validation failed.',
-                'errors': form.errors
-            }, status=400)
+            messages.error(request, 'Form validation failed. Please check the entered data.')
     else:
         form = ClassSubjectForm(instance=class_subject)
     
