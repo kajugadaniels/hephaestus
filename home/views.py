@@ -669,15 +669,28 @@ def getClassSubjects(request, class_id):
 @login_required
 def editClassSubject(request, id):
     class_subject = get_object_or_404(ClassSubject, id=id, delete_status=False)
+    
     if request.method == 'POST':
         form = ClassSubjectForm(request.POST, instance=class_subject)
         if form.is_valid():
-            form.save()
+            updated_class_subject = form.save(commit=False)
+            updated_class_subject.updated_by = request.user
+            updated_class_subject.save()
             messages.success(request, 'Class subject updated successfully.')
-            return redirect('home:getClassSubjects', class_id=class_subject.class_group.id)
+            return JsonResponse({
+                'success': True,
+                'message': 'Class subject updated successfully.',
+                'redirect_url': reverse('home:getClassSubjects', args=[class_subject.class_group.id])
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'Form validation failed.',
+                'errors': form.errors
+            }, status=400)
     else:
         form = ClassSubjectForm(instance=class_subject)
-
+    
     context = {
         'form': form,
         'class_subject': class_subject
