@@ -626,19 +626,24 @@ def assignSubjects(request, class_id):
                 raise ValueError("Mismatched data lengths")
 
             for i in range(len(subjects)):
-                ClassSubject.objects.create(
-                    class_group=class_obj,
-                    subject_id=subjects[i],
-                    teacher_id=teachers[i],
-                    day=days[i],
-                    starting_hour=starting_hours[i],
-                    ending_hour=ending_hours[i],
-                    created_by=request.user
-                )
+                try:
+                    class_subject = ClassSubject(
+                        class_group=class_obj,
+                        subject_id=subjects[i],
+                        teacher_id=teachers[i],
+                        day=days[i],
+                        starting_hour=starting_hours[i],
+                        ending_hour=ending_hours[i],
+                        created_by=request.user
+                    )
+                    class_subject.full_clean()
+                    class_subject.save()
+                except ValidationError as e:
+                    messages.error(request, f"Error assigning subject: {e}")
+                    return redirect('home:assignSubjects', class_id=class_id)
+
             messages.success(request, 'Subjects assigned successfully.')
             return redirect('home:getClassSubjects', class_id=class_id)
-        except IntegrityError:
-            messages.error(request, 'Error: Duplicate subject assignment detected.')
         except ValueError as e:
             messages.error(request, f'Error: Invalid data format. {str(e)}')
         except Exception as e:
