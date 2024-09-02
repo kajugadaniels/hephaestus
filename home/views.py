@@ -794,3 +794,19 @@ def attendanceEdit(request, id):
     }
     return render(request, 'pages/attendance/edit.html', context)
 
+@login_required
+def attendanceDelete(request, id):
+    attendance = get_object_or_404(Attendance, id=id, delete_status=False)
+    attendance.delete_status = True
+    attendance.updated_by = request.user
+    attendance.save()
+    messages.success(request, 'Attendance record deleted successfully.')
+    return redirect('home:attendanceList')
+
+@login_required
+def attendanceView(request, id):
+    attendance = get_object_or_404(Attendance, id=id, delete_status=False)
+    context = {
+        'attendance': attendance
+    }
+    return render(request, 'pages/attendance/show.html', context)
