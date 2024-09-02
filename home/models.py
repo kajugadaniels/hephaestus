@@ -344,8 +344,8 @@ class ClassSubject(models.Model):
         ('Friday', 'Friday'),
     ]
 
-    class_group = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='class_subjects', null=True, blank=True)
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='class_subjects', null=True, blank=True)
+    class_group = models.ForeignKey('Class', on_delete=models.CASCADE, related_name='class_subjects', null=True, blank=True)
+    subject = models.ForeignKey('Subject', on_delete=models.CASCADE, related_name='class_subjects', null=True, blank=True)
     teacher = models.ForeignKey('Teacher', on_delete=models.SET_NULL, related_name='taught_subjects', null=True, blank=True)
     day = models.CharField(max_length=10, choices=DAY_CHOICES, null=True, blank=True)
     starting_hour = models.TimeField(null=True, blank=True)
@@ -357,11 +357,24 @@ class ClassSubject(models.Model):
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='class_subjects_updated')
     delete_status = models.BooleanField(default=False)
 
-    class Meta:
-        unique_together = ['class_group', 'subject']
-
     def __str__(self):
-        return f"{self.class_group} - {self.subject}"
+        return f"{self.class_group} - {self.subject} - {self.day}"
+
+    def clean(self):
+        break_start = timezone.datetime.strptime("10:15", "%H:%M").time()
+        break_end = timezone.datetime.strptime("11:00", "%H:%M").time()
+        lunch_start = timezone.datetime.strptime("12:30", "%H:%M").time()
+        lunch_end = timezone.datetime.strptime("14:00", "%H:%M").time()
+
+        if (break_start <= self.starting_hour < break_end) or (break_start < self.ending_hour <= break_end) or \
+           (self.starting_hour < break_start and self.ending_hour > break_end) or \
+           (lunch_start <= self.starting_hour < lunch_end) or (lunch_start < self.ending_hour <= lunch_end) or \
+           (self.starting_hour < lunch_start and self.ending_hour > lunch_end):
+            raise ValidationError("Class time overlaps with break time or lunch time.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
 class Attendance(models.Model):
     ATTENDANCE_CHOICES = [
