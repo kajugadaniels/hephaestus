@@ -742,3 +742,34 @@ def attendanceCreate(request):
         'form': form
     }
     return render(request, 'pages/attendance/create.html', context)
+
+@login_required
+def attendanceBulkCreate(request):
+    if request.method == 'POST':
+        form = AttendanceBulkForm(request.POST)
+        if form.is_valid():
+            class_subject = form.cleaned_data['class_subject']
+            date = form.cleaned_data['date']
+            students = class_subject.class_group.students.filter(delete_status=False)
+            
+            for student in students:
+                status = request.POST.get(f'status_{student.id}')
+                remarks = request.POST.get(f'remarks_{student.id}')
+                Attendance.objects.create(
+                    student=student,
+                    class_subject=class_subject,
+                    date=date,
+                    status=status,
+                    remarks=remarks,
+                    created_by=request.user
+                )
+            
+            messages.success(request, 'Bulk attendance records created successfully.')
+            return redirect('home:attendanceList')
+    else:
+        form = AttendanceBulkForm()
+    
+    context = {
+        'form': form
+    }
+    return render(request, 'pages/attendance/bulk_create.html', context)
