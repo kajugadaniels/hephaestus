@@ -177,3 +177,22 @@ class ClassSubjectForm(forms.ModelForm):
         super(ClassSubjectForm, self).__init__(*args, **kwargs)
         self.fields['subject'].queryset = Subject.objects.filter(delete_status=False)
         self.fields['teacher'].queryset = Teacher.objects.filter(delete_status=False)
+
+class AttendanceForm(forms.ModelForm):
+    class Meta:
+        model = Attendance
+        fields = ['student', 'class_subject', 'date', 'status', 'remarks']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'remarks': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(AttendanceForm, self).__init__(*args, **kwargs)
+        self.fields['student'].queryset = Student.objects.filter(delete_status=False)
+        self.fields['class_subject'].queryset = ClassSubject.objects.filter(delete_status=False)
+
+class AttendanceBulkForm(forms.Form):
+    class_subject = forms.ModelChoiceField(queryset=ClassSubject.objects.filter(delete_status=False), widget=forms.Select(attrs={'class': 'form-control'}))
+    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
