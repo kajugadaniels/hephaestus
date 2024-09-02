@@ -615,24 +615,34 @@ def deleteSubject(request, id):
 def assignSubjects(request, class_id):
     class_obj = get_object_or_404(Class, id=class_id, delete_status=False)
     if request.method == 'POST':
-        subjects_data = request.POST.getlist('subjects[]')
-        for subject_data in subjects_data:
-            subject_id, teacher_id, day, starting_hour, ending_hour = subject_data.split(',')
-            ClassSubject.objects.create(
-                class_group=class_obj,
-                subject_id=subject_id,
-                teacher_id=teacher_id,
-                day=day,
-                starting_hour=starting_hour,
-                ending_hour=ending_hour,
-                created_by=request.user
-            )
-        messages.success(request, 'Subjects assigned successfully.')
-        return JsonResponse({
-            'success': True,
-            'message': 'Subjects assigned successfully.',
-            'redirect_url': reverse('home:getClassSubjects', args=[class_id])
-        })
+        try:
+            subjects = request.POST.getlist('subjects[]')
+            teachers = request.POST.getlist('teachers[]')
+            days = request.POST.getlist('days[]')
+            starting_hours = request.POST.getlist('starting_hours[]')
+            ending_hours = request.POST.getlist('ending_hours[]')
+
+            if len(subjects) != len(teachers) or len(subjects) != len(days) or len(subjects) != len(starting_hours) or len(subjects) != len(ending_hours):
+                raise ValueError("Mismatched data lengths")
+
+            for i in range(len(subjects)):
+                ClassSubject.objects.create(
+                    class_group=class_obj,
+                    subject_id=subjects[i],
+                    teacher_id=teachers[i],
+                    day=days[i],
+                    starting_hour=starting_hours[i],
+                    ending_hour=ending_hours[i],
+                    created_by=request.user
+                )
+            messages.success(request, 'Subjects assigned successfully.')
+            return redirect('home:getClassSubjects', class_id=class_id)
+        except IntegrityError:
+            messages.error(request, 'Error: Duplicate subject assignment detected.')
+        except ValueError as e:
+            messages.error(request, f'Error: Invalid data format. {str(e)}')
+        except Exception as e:
+            messages.error(request, f'An unexpected error occurred: {str(e)}')
     
     subjects = Subject.objects.filter(delete_status=False)
     teachers = Teacher.objects.filter(delete_status=False)

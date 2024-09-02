@@ -95,58 +95,6 @@
                 }
             }
         });
-    
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(form);
-            const subjects = [];
-    
-            const subjectFields = document.querySelectorAll('.subject-field');
-            subjectFields.forEach(field => {
-                const subject = field.querySelector('.subject-select').value;
-                const teacher = field.querySelector('.teacher-select').value;
-                const day = field.querySelector('.day-select').value;
-                const startingHour = field.querySelector('input[name="starting_hours[]"]').value;
-                const endingHour = field.querySelector('input[name="ending_hours[]"]').value;
-    
-                if (subject && teacher && day && startingHour && endingHour) {
-                    subjects.push(`${subject},${teacher},${day},${startingHour},${endingHour}`);
-                }
-            });
-    
-            formData.delete('subjects[]');
-            formData.delete('teachers[]');
-            formData.delete('days[]');
-            formData.delete('starting_hours[]');
-            formData.delete('ending_hours[]');
-    
-            subjects.forEach(subject => formData.append('subjects[]', subject));
-    
-            fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                }
-            }).then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    window.location.href = data.redirect_url;
-                } else {
-                    alert(data.message || 'Error assigning subjects. Please try again.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert(`An error occurred: ${error.message}. Please try again.`);
-            });
-        });
     });
 </script>
 {% endblock %}
