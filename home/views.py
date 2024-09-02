@@ -718,10 +718,9 @@ def deleteClassSubject(request, id):
 
 @login_required
 def attendanceList(request):
-    attendances = Attendance.objects.all().order_by('-date', 'class_subject')
+    attendances = Attendance.objects.filter(delete_status=False).order_by('-date', 'class_subject')
 
     context = {
         'attendances': attendances
     }
-
     return render(request, 'pages/attendance/index.html', context)
