@@ -183,9 +183,11 @@ class AttendanceForm(forms.ModelForm):
         model = Attendance
         fields = ['student', 'class_subject', 'date', 'status', 'remarks']
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'status': forms.Select(attrs={'class': 'form-control'}),
-            'remarks': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'student': forms.Select(attrs={'class': 'form-control js-example-basic-single', 'required': 'true'}),
+            'class_subject': forms.Select(attrs={'class': 'form-control js-example-basic-single', 'required': 'true'}),
+            'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': 'true'}),
+            'status': forms.Select(attrs={'class': 'form-control js-example-basic-single', 'required': 'true'}),
+            'remarks': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -194,5 +196,8 @@ class AttendanceForm(forms.ModelForm):
         self.fields['class_subject'].queryset = ClassSubject.objects.filter(delete_status=False)
 
 class AttendanceBulkForm(forms.Form):
-    class_subject = forms.ModelChoiceField(queryset=ClassSubject.objects.filter(delete_status=False), widget=forms.Select(attrs={'class': 'form-control'}))
-    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
+    class_subject = forms.ModelChoiceField(
+        queryset=ClassSubject.objects.filter(delete_status=False),
+        widget=forms.Select(attrs={'class': 'form-control js-example-basic-single', 'required': 'true'})
+    )
+    date = forms.DateField(widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': 'true'}))
