@@ -658,20 +658,25 @@ def assignSubjects(request, class_id):
 @login_required
 def getClassSubjects(request, class_id):
     class_obj = get_object_or_404(Class, id=class_id, delete_status=False)
-    class_subjects = ClassSubject.objects.filter(class_group_id=class_id, delete_status=False).order_by('day', 'starting_hour')
+    class_subjects = ClassSubject.objects.filter(class_group=class_obj, delete_status=False).order_by('day', 'starting_hour')
     
-    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-    timetable = {day: [] for day in days}
+    # Group subjects by day
+    subjects_by_day = {
+        'Monday': [],
+        'Tuesday': [],
+        'Wednesday': [],
+        'Thursday': [],
+        'Friday': [],
+    }
     
     for subject in class_subjects:
-        timetable[subject.day].append(subject)
-
+        subjects_by_day[subject.day].append(subject)
+    
     context = {
         'class': class_obj,
-        'timetable': timetable,
-        'days': days
+        'subjects_by_day': subjects_by_day,
     }
-
+    
     return render(request, 'pages/class-subject/index.html', context)
 
 @login_required
