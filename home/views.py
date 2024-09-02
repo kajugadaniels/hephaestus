@@ -724,3 +724,21 @@ def attendanceList(request):
         'attendances': attendances
     }
     return render(request, 'pages/attendance/index.html', context)
+
+@login_required
+def attendanceCreate(request):
+    if request.method == 'POST':
+        form = AttendanceForm(request.POST)
+        if form.is_valid():
+            attendance = form.save(commit=False)
+            attendance.created_by = request.user
+            attendance.save()
+            messages.success(request, 'Attendance record created successfully.')
+            return redirect('home:attendanceList')
+    else:
+        form = AttendanceForm()
+    
+    context = {
+        'form': form
+    }
+    return render(request, 'pages/attendance/create.html', context)

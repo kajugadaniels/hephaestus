@@ -55,8 +55,8 @@ urlpatterns = [
     path('class-subject/<int:id>/delete/', deleteClassSubject, name='deleteClassSubject'),
 
     path('attendance/', attendanceList, name='attendanceList'),
-    # path('attendance/create/', attendanceCreate, name='attendanceCreate'),
-    # path('attendance/bulk-create/', attendanceBulkCreate, name='attendanceBulkCreate'),
-    # path('attendance/<int:pk>/edit/', attendanceEdit, name='attendanceEdit'),
-    # path('attendance/<int:pk>/delete/', attendanceDelete, name='attendanceDelete'),
+    path('attendance/create/', attendanceCreate, name='attendanceCreate'),
+    path('attendance/bulk-create/', attendanceBulkCreate, name='attendanceBulkCreate'),
+    path('attendance/<int:pk>/edit/', attendanceEdit, name='attendanceEdit'),
+    path('attendance/<int:pk>/delete/', attendanceDelete, name='attendanceDelete'),
 ]  + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
