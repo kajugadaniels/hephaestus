@@ -773,3 +773,24 @@ def attendanceBulkCreate(request):
         'form': form
     }
     return render(request, 'pages/attendance/bulk_create.html', context)
+
+@login_required
+def attendanceEdit(request, id):
+    attendance = get_object_or_404(Attendance, id=id, delete_status=False)
+    if request.method == 'POST':
+        form = AttendanceForm(request.POST, instance=attendance)
+        if form.is_valid():
+            attendance = form.save(commit=False)
+            attendance.updated_by = request.user
+            attendance.save()
+            messages.success(request, 'Attendance record updated successfully.')
+            return redirect('home:attendanceList')
+    else:
+        form = AttendanceForm(instance=attendance)
+    
+    context = {
+        'form': form,
+        'attendance': attendance
+    }
+    return render(request, 'pages/attendance/edit.html', context)
+
