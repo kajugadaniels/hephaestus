@@ -715,3 +715,13 @@ def deleteClassSubject(request, id):
     class_subject.save()
     messages.success(request, 'Class subject deleted successfully.')
     return redirect('home:getClassSubjects', class_id=class_subject.class_group.id)
+
+@login_required
+def attendanceList(request):
+    attendances = Attendance.objects.all().order_by('-date', 'class_subject')
+
+    context = {
+        'attendances': attendances
+    }
+
+    return render(request, 'pages/attendance/list.html', context)
