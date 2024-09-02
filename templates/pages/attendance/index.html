@@ -1,0 +1,32 @@
+{% extends "layouts/app.html" %}
+
+{% block content %}
+<h1>Attendance Records</h1>
+<a href="#" class="btn btn-primary">Create Attendance</a>
+<a href="#" class="btn btn-success">Bulk Create Attendance</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Student</th>
+            <th>Class Subject</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for attendance in attendances %}
+        <tr>
+            <td>{{ attendance.student.name }}</td>
+            <td>{{ attendance.class_subject }}</td>
+            <td>{{ attendance.date }}</td>
+            <td>{{ attendance.get_status_display }}</td>
+            <td>
+                <a href="{% url 'attendanceEdit' attendance.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'attendanceDelete' attendance.pk %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

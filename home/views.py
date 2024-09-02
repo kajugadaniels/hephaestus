@@ -724,4 +724,4 @@ def attendanceList(request):
         'attendances': attendances
     }
 
-    return render(request, 'pages/attendance/list.html', context)
+    return render(request, 'pages/attendance/index.html', context)
