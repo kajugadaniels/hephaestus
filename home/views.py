@@ -639,7 +639,9 @@ def assignSubjects(request, class_id):
                     class_subject.full_clean()
                     class_subject.save()
                 except ValidationError as e:
-                    messages.error(request, f"Error assigning subject: {e}")
+                    for field, errors in e.message_dict.items():
+                        for error in errors:
+                            messages.error(request, f"{error}")
                     return redirect('home:assignSubjects', class_id=class_id)
 
             messages.success(request, 'Subjects assigned successfully.')
@@ -691,13 +693,21 @@ def editClassSubject(request, id):
     if request.method == 'POST':
         form = ClassSubjectForm(request.POST, instance=class_subject)
         if form.is_valid():
-            updated_class_subject = form.save(commit=False)
-            updated_class_subject.updated_by = request.user
-            updated_class_subject.save()
-            messages.success(request, 'Class subject updated successfully.')
-            return redirect('home:getClassSubjects', class_id=class_subject.class_group.id)
+            try:
+                updated_class_subject = form.save(commit=False)
+                updated_class_subject.updated_by = request.user
+                updated_class_subject.full_clean()
+                updated_class_subject.save()
+                messages.success(request, 'Class subject updated successfully.')
+                return redirect('home:getClassSubjects', class_id=class_subject.class_group.id)
+            except ValidationError as e:
+                for field, errors in e.message_dict.items():
+                    for error in errors:
+                        messages.error(request, f"{error}")
         else:
-            messages.error(request, 'Form validation failed. Please check the entered data.')
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field.capitalize()}: {error}")
     else:
         form = ClassSubjectForm(instance=class_subject)
     

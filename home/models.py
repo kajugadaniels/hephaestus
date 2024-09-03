@@ -221,11 +221,11 @@ class AcademicYear(models.Model):
     name = models.CharField(max_length=9, unique=True, null=True, blank=True)  # e.g., "2023-2024"
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='academic_years_created')
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='academic_years_updated')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='academic_years_created', null=True, blank=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='academic_years_updated', null=True, blank=True)
     delete_status = models.BooleanField(default=False)
 
     def __str__(self):
@@ -367,10 +367,17 @@ class ClassSubject(models.Model):
         lunch_end = timezone.datetime.strptime("14:00", "%H:%M").time()
 
         if (break_start <= self.starting_hour < break_end) or (break_start < self.ending_hour <= break_end) or \
-           (self.starting_hour < break_start and self.ending_hour > break_end) or \
-           (lunch_start <= self.starting_hour < lunch_end) or (lunch_start < self.ending_hour <= lunch_end) or \
-           (self.starting_hour < lunch_start and self.ending_hour > lunch_end):
-            raise ValidationError("Class time overlaps with break time or lunch time.")
+           (self.starting_hour < break_start and self.ending_hour > break_end):
+            raise ValidationError({
+                "starting_hour": f"Class time ({self.starting_hour.strftime('%H:%M')} - {self.ending_hour.strftime('%H:%M')}) overlaps with break time (10:15 - 11:00).",
+                "ending_hour": f"Class time ({self.starting_hour.strftime('%H:%M')} - {self.ending_hour.strftime('%H:%M')}) overlaps with break time (10:15 - 11:00)."
+            })
+        elif (lunch_start <= self.starting_hour < lunch_end) or (lunch_start < self.ending_hour <= lunch_end) or \
+             (self.starting_hour < lunch_start and self.ending_hour > lunch_end):
+            raise ValidationError({
+                "starting_hour": f"Class time ({self.starting_hour.strftime('%H:%M')} - {self.ending_hour.strftime('%H:%M')}) overlaps with lunch time (12:30 - 14:00).",
+                "ending_hour": f"Class time ({self.starting_hour.strftime('%H:%M')} - {self.ending_hour.strftime('%H:%M')}) overlaps with lunch time (12:30 - 14:00)."
+            })
 
     def save(self, *args, **kwargs):
         self.full_clean()
