@@ -1,7 +1,7 @@
 from home.forms import *
 from home.models import *
+from datetime import time
 from account.models import *
-from django.urls import reverse
 from django.conf import settings
 from django.contrib import messages
 from django.http import JsonResponse
@@ -667,6 +667,10 @@ def getClassSubjects(request, class_id):
     class_obj = get_object_or_404(Class, id=class_id, delete_status=False)
     class_subjects = ClassSubject.objects.filter(class_group=class_obj, delete_status=False).order_by('day', 'starting_hour')
     
+    # Define break and lunch times
+    break_time = {'name': 'Break Time', 'starting_hour': time(10, 15), 'ending_hour': time(11, 0)}
+    lunch_time = {'name': 'Lunch Time', 'starting_hour': time(12, 30), 'ending_hour': time(14, 0)}
+    
     # Group subjects by day
     subjects_by_day = {
         'Monday': [],
@@ -677,7 +681,25 @@ def getClassSubjects(request, class_id):
     }
     
     for subject in class_subjects:
-        subjects_by_day[subject.day].append(subject)
+        day_schedule = subjects_by_day[subject.day]
+        day_schedule.append({
+            'name': subject.subject.name,
+            'teacher': subject.teacher,
+            'starting_hour': subject.starting_hour,
+            'ending_hour': subject.ending_hour,
+            'is_break': False,
+            'id': subject.id
+        })
+    
+    # Add break and lunch times to each day
+    for day_schedule in subjects_by_day.values():
+        if not any(s['name'] == 'Break Time' for s in day_schedule):
+            day_schedule.append({**break_time, 'is_break': True, 'teacher': None, 'id': None})
+        if not any(s['name'] == 'Lunch Time' for s in day_schedule):
+            day_schedule.append({**lunch_time, 'is_break': True, 'teacher': None, 'id': None})
+        
+        # Sort the day's schedule
+        day_schedule.sort(key=lambda x: x['starting_hour'])
     
     context = {
         'class': class_obj,

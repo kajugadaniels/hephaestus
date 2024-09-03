@@ -37,13 +37,25 @@
                                 </thead>
                                 <tbody>
                                     {% for subject in subjects %}
-                                        <tr>
-                                            <td>{{ subject.subject.name }}</td>
-                                            <td>{{ subject.teacher.name }}</td>
+                                        <tr {% if subject.is_break %}
+                                                {% if subject.name == 'Break Time' %}
+                                                    class="table-success"
+                                                {% elif subject.name == 'Lunch Time' %}
+                                                    class="table-primary"
+                                                {% endif %}
+                                            {% endif %}>
+                                            <td>{{ subject.name }}</td>
+                                            <td>
+                                                {% if subject.teacher %}
+                                                    {{ subject.teacher.name }}
+                                                {% endif %}
+                                            </td>
                                             <td>{{ subject.starting_hour|time:"H:i" }} - {{ subject.ending_hour|time:"H:i" }}</td>
                                             <td>
-                                                <a href="{% url 'home:editClassSubject' subject.id %}" class="btn btn-sm btn-warning">Edit</a>
-                                                <a href="{% url 'home:deleteClassSubject' subject.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this subject?')">Delete</a>
+                                                {% if not subject.is_break %}
+                                                    <a href="{% url 'home:editClassSubject' subject.id %}" class="btn btn-sm btn-warning">Edit</a>
+                                                    <a href="{% url 'home:deleteClassSubject' subject.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this subject?')">Delete</a>
+                                                {% endif %}
                                             </td>
                                         </tr>
                                     {% endfor %}
