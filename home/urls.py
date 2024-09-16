@@ -13,17 +13,17 @@ urlpatterns = [
 
     path('upload_image/', upload_image, name='upload_image'),
 
-    path('students/', getStudents, name='getStudents'),
-    path('student/add', addStudent, name='addStudent'),
-    path('student/<slug:slug>', viewStudent, name='viewStudent'),
-    path('student/<slug:slug>/edit', editStudent, name='editStudent'),
-    path('student/<slug:slug>/delete', deleteStudent, name='deleteStudent'),
-
     path('teachers/', getTeachers, name='getTeachers'),
     path('teacher/add/', addTeacher, name='addTeacher'),
     path('teacher/<str:employee_id>/', viewTeacher, name='viewTeacher'),
     path('teacher/<str:employee_id>/edit/', editTeacher, name='editTeacher'),
     path('teacher/<str:employee_id>/delete/', deleteTeacher, name='deleteTeacher'),
+
+    path('students/', getStudents, name='getStudents'),
+    path('student/add', addStudent, name='addStudent'),
+    path('student/<slug:slug>', viewStudent, name='viewStudent'),
+    path('student/<slug:slug>/edit', editStudent, name='editStudent'),
+    path('student/<slug:slug>/delete', deleteStudent, name='deleteStudent'),
 
     path('academic-years/', getAcademicYears, name='getAcademicYears'),
     path('academic-year/add/', addAcademicYear, name='addAcademicYear'),

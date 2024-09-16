@@ -86,115 +86,6 @@ def upload_image(request):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 @login_required
-def getStudents(request):
-    students = Student.objects.filter(delete_status=False).order_by('-created_at')
-
-    context = {
-        'students': students
-    }
-
-    return render(request, 'pages/students/index.html', context)
-
-@login_required
-def addStudent(request):
-    try:
-        if request.method == 'POST':
-            form = StudentForm(request.POST, request.FILES)
-            if form.is_valid():
-                student = form.save(commit=False)
-                student.modified_by = request.user
-                student.save()
-                messages.success(request, 'Student added successfully.')
-                return redirect('home:getStudents')
-            else:
-                for field, errors in form.errors.items():
-                    for error in errors:
-                        messages.error(request, f"{field}: {error}")
-                logger.warning(f"Form validation errors while adding a new student: {form.errors}")
-        else:
-            form = StudentForm()
-    
-    except ValidationError as e:
-        messages.error(request, f'Validation error: {e}')
-        logger.error(f"Validation error while adding a new student: {e}")
-    
-    except Exception as e:
-        messages.error(request, 'An unexpected error occurred. Please try again later.')
-        logger.error(f"Unexpected error while adding a new student: {e}")
-    
-    context = {
-        'form': form
-    }
-
-    return render(request, 'pages/students/create.html', context)
-
-@login_required
-def viewStudent(request, slug):
-    student = get_object_or_404(Student, slug=slug, delete_status=False)
-
-    context = {
-        'student': student
-    }
-
-    return render(request, 'pages/students/show.html', context)
-
-@login_required
-def editStudent(request, slug):
-    try:
-        student = get_object_or_404(Student, slug=slug, delete_status=False)
-        
-        if request.method == 'POST':
-            form = StudentForm(request.POST, request.FILES, instance=student)
-            if form.is_valid():
-                student = form.save(commit=False)
-                
-                # Handle image upload separately
-                if 'image' in request.FILES:
-                    student.image = request.FILES['image']
-                
-                student.modified_by = request.user
-                student.save()
-                messages.success(request, 'Student updated successfully.')
-                return redirect('home:viewStudent', slug=student.slug)
-            else:
-                # Iterate through form errors and provide field-specific messages
-                for field, errors in form.errors.items():
-                    for error in errors:
-                        messages.error(request, f"{field}: {error}")
-                logger.warning(f"Form validation errors while updating student {slug}: {form.errors}")
-        else:
-            form = StudentForm(instance=student)
-    
-    except ValidationError as e:
-        messages.error(request, f'Validation error: {e}')
-        logger.error(f"Validation error while updating student {slug}: {e}")
-    
-    except Student.DoesNotExist:
-        messages.error(request, 'The requested student does not exist.')
-        logger.error(f"Student with slug {slug} does not exist.")
-        return redirect('home:getStudents')
-    
-    except Exception as e:
-        messages.error(request, 'An unexpected error occurred. Please try again later.')
-        logger.error(f"Unexpected error while editing student {slug}: {e}")
-    
-    context = {
-        'form': form,
-        'student': student
-    }
-
-    return render(request, 'pages/students/edit.html', context)
-
-@login_required
-def deleteStudent(request, slug):
-    student = get_object_or_404(Student, slug=slug, delete_status=False)
-    student.delete_status = True
-    student.modified_by = request.user
-    student.save()
-    messages.success(request, 'Student deleted successfully.')
-    return redirect('home:getStudents')
-
-@login_required
 def getTeachers(request):
     teachers = Teacher.objects.filter(delete_status=False).order_by('-created_at')
 
@@ -319,6 +210,115 @@ def getAcademicYears(request):
     }
 
     return render(request, 'pages/academicYears/index.html', context)
+
+@login_required
+def getStudents(request):
+    students = Student.objects.filter(delete_status=False).order_by('-created_at')
+
+    context = {
+        'students': students
+    }
+
+    return render(request, 'pages/students/index.html', context)
+
+@login_required
+def addStudent(request):
+    try:
+        if request.method == 'POST':
+            form = StudentForm(request.POST, request.FILES)
+            if form.is_valid():
+                student = form.save(commit=False)
+                student.modified_by = request.user
+                student.save()
+                messages.success(request, 'Student added successfully.')
+                return redirect('home:getStudents')
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
+                logger.warning(f"Form validation errors while adding a new student: {form.errors}")
+        else:
+            form = StudentForm()
+    
+    except ValidationError as e:
+        messages.error(request, f'Validation error: {e}')
+        logger.error(f"Validation error while adding a new student: {e}")
+    
+    except Exception as e:
+        messages.error(request, 'An unexpected error occurred. Please try again later.')
+        logger.error(f"Unexpected error while adding a new student: {e}")
+    
+    context = {
+        'form': form
+    }
+
+    return render(request, 'pages/students/create.html', context)
+
+@login_required
+def viewStudent(request, slug):
+    student = get_object_or_404(Student, slug=slug, delete_status=False)
+
+    context = {
+        'student': student
+    }
+
+    return render(request, 'pages/students/show.html', context)
+
+@login_required
+def editStudent(request, slug):
+    try:
+        student = get_object_or_404(Student, slug=slug, delete_status=False)
+        
+        if request.method == 'POST':
+            form = StudentForm(request.POST, request.FILES, instance=student)
+            if form.is_valid():
+                student = form.save(commit=False)
+                
+                # Handle image upload separately
+                if 'image' in request.FILES:
+                    student.image = request.FILES['image']
+                
+                student.modified_by = request.user
+                student.save()
+                messages.success(request, 'Student updated successfully.')
+                return redirect('home:viewStudent', slug=student.slug)
+            else:
+                # Iterate through form errors and provide field-specific messages
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
+                logger.warning(f"Form validation errors while updating student {slug}: {form.errors}")
+        else:
+            form = StudentForm(instance=student)
+    
+    except ValidationError as e:
+        messages.error(request, f'Validation error: {e}')
+        logger.error(f"Validation error while updating student {slug}: {e}")
+    
+    except Student.DoesNotExist:
+        messages.error(request, 'The requested student does not exist.')
+        logger.error(f"Student with slug {slug} does not exist.")
+        return redirect('home:getStudents')
+    
+    except Exception as e:
+        messages.error(request, 'An unexpected error occurred. Please try again later.')
+        logger.error(f"Unexpected error while editing student {slug}: {e}")
+    
+    context = {
+        'form': form,
+        'student': student
+    }
+
+    return render(request, 'pages/students/edit.html', context)
+
+@login_required
+def deleteStudent(request, slug):
+    student = get_object_or_404(Student, slug=slug, delete_status=False)
+    student.delete_status = True
+    student.modified_by = request.user
+    student.save()
+    messages.success(request, 'Student deleted successfully.')
+    return redirect('home:getStudents')
 
 @login_required
 def addAcademicYear(request):
