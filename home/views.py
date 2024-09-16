@@ -181,7 +181,10 @@ def addTeacher(request):
                 messages.success(request, 'Teacher added successfully.')
                 return redirect('home:getTeachers')
             else:
-                messages.error(request, 'Please correct the errors below.')
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
+                logger.warning(f"Form validation errors while adding a new teacher: {form.errors}")
         else:
             form = TeacherForm()
     
