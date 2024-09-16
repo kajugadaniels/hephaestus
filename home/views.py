@@ -164,6 +164,7 @@ def getTeachers(request):
     context = {
         'teachers': teachers
     }
+
     return render(request, 'pages/teachers/index.html', context)
 
 @login_required
@@ -182,12 +183,18 @@ def addTeacher(request):
     context = {
         'form': form
     }
+
     return render(request, 'pages/teachers/create.html', context)
 
 @login_required
 def viewTeacher(request, employee_id):
     teacher = get_object_or_404(Teacher, employee_id=employee_id, delete_status=False)
-    return render(request, 'pages/teachers/show.html', {'teacher': teacher})
+
+    context = {
+        'teacher': teacher
+    }
+
+    return render(request, 'pages/teachers/show.html', context)
 
 @login_required
 def editTeacher(request, employee_id):
