@@ -89,6 +89,21 @@ def upload_image(request):
 def getTeachers(request):
     teachers = Teacher.objects.filter(delete_status=False).order_by('-created_at')
 
+    # Fetch current term and academic year
+    today = timezone.now().date()
+    current_term = Term.objects.filter(start_date__lte=today, end_date__gte=today).first()
+    current_academic_year = AcademicYear.objects.filter(start_date__lte=today, end_date__gte=today).first()
+
+    for teacher in teachers:
+        if today.weekday() in [5, 6]:  # Saturday or Sunday
+            teacher.can_add_attendance = False
+            teacher.attendance_message = 'Weekend'
+        elif current_term and current_academic_year:
+            teacher.can_add_attendance = True
+        else:
+            teacher.can_add_attendance = False
+            teacher.attendance_message = 'Term/Academic year has ended'
+
     context = {
         'teachers': teachers
     }
