@@ -34,12 +34,12 @@ class StudentAdmin(admin.ModelAdmin):
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
     list_display = ('name', 'employee_id', 'position', 'department', 'employment_status', 'date_joined', 'delete_status')
-    search_fields = ('user__name', 'employee_id', 'position', 'department', 'subjects_taught')
+    search_fields = ('name', 'employee_id', 'position', 'department', 'subjects_taught')  # Modified
     list_filter = ('gender', 'employment_status', 'delete_status', 'date_joined')
     readonly_fields = ('created_at', 'updated_at')
 
     def name(self, obj):
-        return obj.user.name
+        return obj.name
 
 @admin.register(AcademicYear)
 class AcademicYearAdmin(admin.ModelAdmin):
