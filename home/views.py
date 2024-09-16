@@ -725,15 +725,30 @@ def getSubjects(request):
 def addSubject(request):
     if request.method == 'POST':
         form = SubjectForm(request.POST)
-        if form.is_valid():
-            subject = form.save(commit=False)
-            subject.created_by = request.user
-            subject.save()
-            messages.success(request, 'Subject added successfully.')
-            return redirect('home:getSubjects')
+        try:
+            if form.is_valid():
+                subject = form.save(commit=False)
+                subject.created_by = request.user
+                subject.save()
+                messages.success(request, 'Subject added successfully.')
+                return redirect('home:getSubjects')
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field.capitalize()}: {error}")
+                logger.warning(f"Form validation errors while adding a new subject: {form.errors}")
+        except IntegrityError:
+            messages.error(request, 'An error occurred while saving the subject. It may already exist.')
+            logger.error("Integrity error while adding subject")
+        except ValidationError as e:
+            messages.error(request, f"Validation error: {e}")
+            logger.error(f"Validation error while adding subject: {e}")
+        except Exception as e:
+            messages.error(request, 'An unexpected error occurred. Please try again later.')
+            logger.error(f"Unexpected error while adding subject: {e}")
     else:
         form = SubjectForm()
-
+    
     context = {
         'form': form
     }
@@ -753,17 +768,34 @@ def viewSubject(request, id):
 @login_required
 def editSubject(request, id):
     subject = get_object_or_404(Subject, id=id, delete_status=False)
+    
     if request.method == 'POST':
         form = SubjectForm(request.POST, instance=subject)
-        if form.is_valid():
-            subject = form.save(commit=False)
-            subject.updated_by = request.user
-            subject.save()
-            messages.success(request, 'Subject updated successfully.')
-            return redirect('home:viewSubject', id=subject.id)
+        try:
+            if form.is_valid():
+                updated_subject = form.save(commit=False)
+                updated_subject.updated_by = request.user
+                updated_subject.save()
+                messages.success(request, 'Subject updated successfully.')
+                return redirect('home:viewSubject', id=updated_subject.id)
+            else:
+                # Iterate through form errors and provide field-specific messages
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field.capitalize()}: {error}")
+                logger.warning(f"Form validation errors while updating subject {id}: {form.errors}")
+        except IntegrityError:
+            messages.error(request, 'An error occurred while updating the subject. It may already exist.')
+            logger.error(f"Integrity error while updating subject {id}")
+        except ValidationError as e:
+            messages.error(request, f"Validation error: {e}")
+            logger.error(f"Validation error while updating subject {id}: {e}")
+        except Exception as e:
+            messages.error(request, 'An unexpected error occurred. Please try again later.')
+            logger.error(f"Unexpected error while updating subject {id}: {e}")
     else:
         form = SubjectForm(instance=subject)
-
+    
     context = {
         'form': form,
         'subject': subject
