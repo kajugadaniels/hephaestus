@@ -308,19 +308,32 @@ def getTerms(request):
 
     return render(request, 'pages/terms/index.html', context)
 
-@login_required
 def addTerm(request):
-    if request.method == 'POST':
-        form = TermForm(request.POST)
-        if form.is_valid():
-            term = form.save(commit=False)
-            term.created_by = request.user
-            term.save()
-            messages.success(request, 'Term added successfully.')
-            return redirect('home:getTerms')
-    else:
-        form = TermForm()
-
+    try:
+        if request.method == 'POST':
+            form = TermForm(request.POST)
+            if form.is_valid():
+                term = form.save(commit=False)
+                term.created_by = request.user
+                term.save()
+                messages.success(request, 'Term added successfully.')
+                return redirect('home:getTerms')
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
+                logger.warning(f"Form validation errors while adding a new term: {form.errors}")
+        else:
+            form = TermForm()
+    
+    except ValidationError as e:
+        messages.error(request, f'Validation error: {e}')
+        logger.error(f"Validation error while adding a new term: {e}")
+    
+    except Exception as e:
+        messages.error(request, 'An unexpected error occurred. Please try again later.')
+        logger.error(f"Unexpected error while adding a new term: {e}")
+    
     context = {
         'form': form
     }
@@ -339,18 +352,38 @@ def viewTerm(request, id):
 
 @login_required
 def editTerm(request, id):
-    term = get_object_or_404(Term, id=id, delete_status=False)
-    if request.method == 'POST':
-        form = TermForm(request.POST, instance=term)
-        if form.is_valid():
-            term = form.save(commit=False)
-            term.updated_by = request.user
-            term.save()
-            messages.success(request, 'Term updated successfully.')
-            return redirect('home:viewTerm', id=term.id)
-    else:
-        form = TermForm(instance=term)
-
+    try:
+        term = get_object_or_404(Term, id=id, delete_status=False)
+        
+        if request.method == 'POST':
+            form = TermForm(request.POST, instance=term)
+            if form.is_valid():
+                term = form.save(commit=False)
+                term.updated_by = request.user
+                term.save()
+                messages.success(request, 'Term updated successfully.')
+                return redirect('home:viewTerm', id=term.id)
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
+                logger.warning(f"Form validation errors while updating term {id}: {form.errors}")
+        else:
+            form = TermForm(instance=term)
+    
+    except ValidationError as e:
+        messages.error(request, f'Validation error: {e}')
+        logger.error(f"Validation error while updating term {id}: {e}")
+    
+    except Term.DoesNotExist:
+        messages.error(request, 'The requested term does not exist.')
+        logger.error(f"Term with ID {id} does not exist.")
+        return redirect('home:getTerms')
+    
+    except Exception as e:
+        messages.error(request, 'An unexpected error occurred. Please try again later.')
+        logger.error(f"Unexpected error while editing term {id}: {e}")
+    
     context = {
         'form': form,
         'term': term
