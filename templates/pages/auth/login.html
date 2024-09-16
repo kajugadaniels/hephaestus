@@ -56,6 +56,14 @@
                                         {% endif %}
                                     </div>
                                 </div>
+                                <div class="col-xl-12 mb-3">
+                                    <label class="form-label text-default">Academic Year</label>
+                                    <select name="academic_year" class="form-select">
+                                        {% for year in academic_years %}
+                                            <option value="{{ year.id }}">{{ year.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                                 <div class="col-xl-12 d-grid mt-2">
                                     <button type="submit" class="btn btn-lg btn-primary">Sign In</button>
                                 </div>
