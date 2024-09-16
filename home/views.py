@@ -813,57 +813,6 @@ def deleteSubject(request, id):
     return redirect('home:getSubjects')
 
 @login_required
-def assignSubjects(request, class_id):
-    class_obj = get_object_or_404(Class, id=class_id, delete_status=False)
-    if request.method == 'POST':
-        try:
-            subjects = request.POST.getlist('subjects[]')
-            teachers = request.POST.getlist('teachers[]')
-            days = request.POST.getlist('days[]')
-            starting_hours = request.POST.getlist('starting_hours[]')
-            ending_hours = request.POST.getlist('ending_hours[]')
-
-            if len(subjects) != len(teachers) or len(subjects) != len(days) or len(subjects) != len(starting_hours) or len(subjects) != len(ending_hours):
-                raise ValueError("Mismatched data lengths")
-
-            for i in range(len(subjects)):
-                try:
-                    class_subject = ClassSubject(
-                        class_group=class_obj,
-                        subject_id=subjects[i],
-                        teacher_id=teachers[i],
-                        day=days[i],
-                        starting_hour=starting_hours[i],
-                        ending_hour=ending_hours[i],
-                        created_by=request.user
-                    )
-                    class_subject.full_clean()
-                    class_subject.save()
-                except ValidationError as e:
-                    for field, errors in e.message_dict.items():
-                        for error in errors:
-                            messages.error(request, f"{error}")
-                    return redirect('home:assignSubjects', class_id=class_id)
-
-            messages.success(request, 'Subjects assigned successfully.')
-            return redirect('home:getClassSubjects', class_id=class_id)
-        except ValueError as e:
-            messages.error(request, f'Error: Invalid data format. {str(e)}')
-        except Exception as e:
-            messages.error(request, f'An unexpected error occurred: {str(e)}')
-    
-    subjects = Subject.objects.filter(delete_status=False)
-    teachers = Teacher.objects.filter(delete_status=False)
-
-    context = {
-        'class': class_obj,
-        'subjects': subjects,
-        'teachers': teachers
-    }
-
-    return render(request, 'pages/class-subject/create.html', context)
-
-@login_required
 def getClassSubjects(request, class_id):
     class_obj = get_object_or_404(Class, id=class_id, delete_status=False)
     class_subjects = ClassSubject.objects.filter(class_group=class_obj, delete_status=False).order_by('day', 'starting_hour')
@@ -910,27 +859,91 @@ def getClassSubjects(request, class_id):
     return render(request, 'pages/class-subject/index.html', context)
 
 @login_required
+def assignSubjects(request, class_id):
+    class_obj = get_object_or_404(Class, id=class_id, delete_status=False)
+    
+    if request.method == 'POST':
+        try:
+            subjects = request.POST.getlist('subjects[]')
+            teachers = request.POST.getlist('teachers[]')
+            days = request.POST.getlist('days[]')
+            starting_hours = request.POST.getlist('starting_hours[]')
+            ending_hours = request.POST.getlist('ending_hours[]')
+
+            # Validate that all lists have the same length
+            if len(subjects) != len(teachers) or len(subjects) != len(days) or len(subjects) != len(starting_hours) or len(subjects) != len(ending_hours):
+                raise ValueError("Mismatched data lengths")
+
+            for i in range(len(subjects)):
+                try:
+                    class_subject = ClassSubject(
+                        class_group=class_obj,
+                        subject_id=subjects[i],
+                        teacher_id=teachers[i],
+                        day=days[i],
+                        starting_hour=starting_hours[i],
+                        ending_hour=ending_hours[i],
+                        created_by=request.user
+                    )
+                    class_subject.full_clean()
+                    class_subject.save()
+                except ValidationError as e:
+                    # Log and show validation errors for the current subject assignment
+                    for field, errors in e.message_dict.items():
+                        for error in errors:
+                            messages.error(request, f"{error}")
+                    logger.warning(f"Validation error for class_subject assignment: {e}")
+                    return redirect('home:assignSubjects', class_id=class_id)
+
+            messages.success(request, 'Subjects assigned successfully.')
+            return redirect('home:getClassSubjects', class_id=class_id)
+        except ValueError as e:
+            messages.error(request, f'Error: Invalid data format. {str(e)}')
+            logger.error(f"Value error while assigning subjects: {e}")
+        except Exception as e:
+            messages.error(request, f'An unexpected error occurred: {str(e)}')
+            logger.error(f"Unexpected error while assigning subjects: {e}")
+    
+    subjects = Subject.objects.filter(delete_status=False)
+    teachers = Teacher.objects.filter(delete_status=False)
+
+    context = {
+        'class': class_obj,
+        'subjects': subjects,
+        'teachers': teachers
+    }
+
+    return render(request, 'pages/class-subject/create.html', context)
+
+@login_required
 def editClassSubject(request, id):
     class_subject = get_object_or_404(ClassSubject, id=id, delete_status=False)
     
     if request.method == 'POST':
         form = ClassSubjectForm(request.POST, instance=class_subject)
-        if form.is_valid():
-            try:
+        try:
+            if form.is_valid():
                 updated_class_subject = form.save(commit=False)
                 updated_class_subject.updated_by = request.user
                 updated_class_subject.full_clean()
                 updated_class_subject.save()
                 messages.success(request, 'Class subject updated successfully.')
-                return redirect('home:getClassSubjects', class_id=class_subject.class_group.id)
-            except ValidationError as e:
-                for field, errors in e.message_dict.items():
+                return redirect('home:getClassSubjects', class_id=updated_class_subject.class_group.id)
+            else:
+                # Log and show validation errors for the form
+                for field, errors in form.errors.items():
                     for error in errors:
-                        messages.error(request, f"{error}")
-        else:
-            for field, errors in form.errors.items():
+                        messages.error(request, f"{field.capitalize()}: {error}")
+                logger.warning(f"Form validation errors while editing class_subject {id}: {form.errors}")
+        except ValidationError as e:
+            # Log and show validation errors that occur during save
+            for field, errors in e.message_dict.items():
                 for error in errors:
-                    messages.error(request, f"{field.capitalize()}: {error}")
+                    messages.error(request, f"{error}")
+            logger.error(f"Validation error while editing class_subject {id}: {e}")
+        except Exception as e:
+            messages.error(request, 'An unexpected error occurred. Please try again later.')
+            logger.error(f"Unexpected error while editing class_subject {id}: {e}")
     else:
         form = ClassSubjectForm(instance=class_subject)
     

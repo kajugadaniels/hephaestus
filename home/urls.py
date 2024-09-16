@@ -49,8 +49,8 @@ urlpatterns = [
     path('subject/<int:id>/edit/', editSubject, name='editSubject'),
     path('subject/<int:id>/delete/', deleteSubject, name='deleteSubject'),
 
-    path('class/<int:class_id>/assign-subjects/', assignSubjects, name='assignSubjects'),
     path('class/<int:class_id>/subjects/', getClassSubjects, name='getClassSubjects'),
+    path('class/<int:class_id>/assign-subjects/', assignSubjects, name='assignSubjects'),
     path('class-subject/<int:id>/edit/', editClassSubject, name='editClassSubject'),
     path('class-subject/<int:id>/delete/', deleteClassSubject, name='deleteClassSubject'),
 ]  + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
