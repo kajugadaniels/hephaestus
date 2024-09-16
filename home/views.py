@@ -198,18 +198,35 @@ def viewTeacher(request, employee_id):
 
 @login_required
 def editTeacher(request, employee_id):
-    teacher = get_object_or_404(Teacher, employee_id=employee_id, delete_status=False)
-    if request.method == 'POST':
-        form = TeacherForm(request.POST, request.FILES, instance=teacher)
-        if form.is_valid():
-            teacher = form.save(commit=False)
-            teacher.updated_by = request.user
-            teacher.save()
-            messages.success(request, 'Teacher updated successfully.')
-            return redirect('home:viewTeacher', employee_id=teacher.employee_id)
-    else:
-        form = TeacherForm(instance=teacher)
-
+    try:
+        teacher = get_object_or_404(Teacher, employee_id=employee_id, delete_status=False)
+        
+        if request.method == 'POST':
+            form = TeacherForm(request.POST, request.FILES, instance=teacher)
+            if form.is_valid():
+                teacher = form.save(commit=False)
+                teacher.updated_by = request.user
+                teacher.save()
+                messages.success(request, 'Teacher updated successfully.')
+                return redirect('home:viewTeacher', employee_id=teacher.employee_id)
+            else:
+                messages.error(request, 'Please correct the errors below.')
+        else:
+            form = TeacherForm(instance=teacher)
+    
+    except ValidationError as e:
+        messages.error(request, f'Validation error: {e}')
+        logger.error(f"Validation error while updating teacher {employee_id}: {e}")
+    
+    except Teacher.DoesNotExist:
+        messages.error(request, 'The requested teacher does not exist.')
+        logger.error(f"Teacher with employee_id {employee_id} does not exist.")
+        return redirect('home:getTeachers')
+    
+    except Exception as e:
+        messages.error(request, 'An unexpected error occurred. Please try again later.')
+        logger.error(f"Unexpected error while editing teacher {employee_id}: {e}")
+    
     context = {
         'form': form,
         'teacher': teacher
