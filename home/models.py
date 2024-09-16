@@ -13,6 +13,24 @@ from django.core.exceptions import ValidationError
 
 User = get_user_model()
 
+class AcademicYear(models.Model):
+    name = models.CharField(max_length=9, unique=True, null=True, blank=True)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='academic_years_created', null=True, blank=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='academic_years_updated', null=True, blank=True)
+    delete_status = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+    def clean(self):
+        if self.start_date >= self.end_date:
+            raise ValidationError("End date must be after start date.")
+
 def student_image_path(instance, filename):
     base_filename, file_extension = os.path.splitext(filename)
     return f'students/student_{slugify(instance.name)}_{instance.dob}_{instance.gender}{file_extension}'
@@ -36,6 +54,7 @@ class Student(models.Model):
         ('Dropped', 'Dropped')
     )
 
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='students', null=True, blank=True)
     name = models.CharField(max_length=255, null=True, blank=True)
     slug = models.SlugField(unique=True, blank=True)
     roll_id = models.CharField(max_length=6, unique=True, editable=False, null=True, blank=True)
@@ -134,6 +153,7 @@ class Teacher(models.Model):
         ('Temporary', 'Temporary'),
     )
 
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='teachers', null=True, blank=True)
     name = models.CharField(max_length=255, null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
     phone_number = models.CharField(max_length=15, null=True, blank=True)
@@ -215,31 +235,13 @@ class Teacher(models.Model):
         self.delete_status = True
         self.save()
 
-class AcademicYear(models.Model):
-    name = models.CharField(max_length=9, unique=True, null=True, blank=True)
-    start_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='academic_years_created', null=True, blank=True)
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='academic_years_updated', null=True, blank=True)
-    delete_status = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.name
-
-    def clean(self):
-        if self.start_date >= self.end_date:
-            raise ValidationError("End date must be after start date.")
-
 class Term(models.Model):
     TERM_CHOICES = [
         ('1', 'First Term'),
         ('2', 'Middle Term'),
         ('3', 'Final Term'),
     ]
-    
+
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='terms', null=True, blank=True)
     name = models.CharField(max_length=1, choices=TERM_CHOICES, null=True, blank=True)
     start_date = models.DateField(null=True, blank=True)
@@ -281,13 +283,13 @@ class Class(models.Model):
         ('D', 'D'),
     ]
 
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, null=True, blank=True, related_name='classes')
     name = models.CharField(max_length=50, null=True, blank=True)
     grade = models.CharField(max_length=1, choices=GRADE_CHOICES, null=True, blank=True)
     section = models.CharField(max_length=1, choices=SECTION_CHOICES, null=True, blank=True)
     head_teacher = models.ForeignKey('Teacher', on_delete=models.SET_NULL, null=True, blank=True, related_name='headed_classes')
     students = models.ManyToManyField('Student', related_name='classes', null=True, blank=True)
     capacity = models.PositiveIntegerField(default=30, null=True, blank=True)
-    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, null=True, blank=True, related_name='classes')
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -303,6 +305,7 @@ class Class(models.Model):
         return f"Year {self.grade} Grade {self.section} - {self.academic_year}"
 
 class Subject(models.Model):
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='subjects', null=True, blank=True)
     name = models.CharField(max_length=100, unique=True, null=True, blank=True)
     code = models.CharField(max_length=10, unique=True, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -342,6 +345,7 @@ class ClassSubject(models.Model):
         ('Friday', 'Friday'),
     ]
 
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='class_subjects', null=True, blank=True)
     class_group = models.ForeignKey('Class', on_delete=models.CASCADE, related_name='class_subjects', null=True, blank=True)
     subject = models.ForeignKey('Subject', on_delete=models.CASCADE, related_name='class_subjects', null=True, blank=True)
     teacher = models.ForeignKey('Teacher', on_delete=models.SET_NULL, related_name='taught_subjects', null=True, blank=True)
@@ -389,6 +393,7 @@ class Attendance(models.Model):
         ('excused', 'Excused'),
     ]
 
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='attendances', null=True, blank=True)
     student = models.ForeignKey('Student', on_delete=models.CASCADE, related_name='attendances', null=True, blank=True)
     class_subject = models.ForeignKey(ClassSubject, on_delete=models.CASCADE, related_name='attendances', null=True, blank=True)
     date = models.DateField(null=True, blank=True)
@@ -420,6 +425,7 @@ class Attendance(models.Model):
         return f"{self.student.name} - {self.class_subject.subject.name} - {self.date}"
 
 class Holiday(models.Model):
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='holidays', null=True, blank=True)
     name = models.CharField(max_length=100, null=True, blank=True)
     date = models.DateField(unique=True, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
