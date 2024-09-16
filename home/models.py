@@ -381,16 +381,6 @@ class ClassSubject(models.Model):
         self.full_clean()
         super().save(*args, **kwargs)
 
-class TeacherAttendance(models.Model):
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
-    date = models.DateField()
-    present = models.BooleanField(default=True)
-    reason = models.TextField(null=True, blank=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    
-    class Meta:
-        unique_together = ('teacher', 'date')
-
 class Attendance(models.Model):
     ATTENDANCE_CHOICES = [
         ('present', 'Present'),
