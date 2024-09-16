@@ -40,7 +40,7 @@ def user_login(request):
         'academic_years': academic_years
     }
 
-    return render(request, 'pages/auth/login.html', )
+    return render(request, 'pages/auth/login.html', context)
 
 def user_logout(request):
     logout(request)

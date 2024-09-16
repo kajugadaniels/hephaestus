@@ -1,3 +1,4 @@
+from home.models import *
 from django import forms
 from account.models import User
 from django.contrib.auth import authenticate
@@ -9,6 +10,12 @@ class LoginForm(forms.Form):
     )
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': '**********'})
+    )
+
+    academic_year = forms.ModelChoiceField(
+        queryset=AcademicYear.objects.filter(delete_status=False).order_by('-start_date'),
+        empty_label=None,
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
 
     def clean(self):
