@@ -1,3 +1,4 @@
+import logging
 from home.forms import *
 from home.models import *
 from datetime import time
@@ -10,8 +11,9 @@ from django.db.models import Exists, OuterRef
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_http_methods
 from django.shortcuts import render, redirect, get_object_or_404
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def dashboard(request):
@@ -169,17 +171,28 @@ def getTeachers(request):
 
 @login_required
 def addTeacher(request):
-    if request.method == 'POST':
-        form = TeacherForm(request.POST, request.FILES)
-        if form.is_valid():
-            teacher = form.save(commit=False)
-            teacher.created_by = request.user
-            teacher.save()
-            messages.success(request, 'Teacher added successfully.')
-            return redirect('home:getTeachers')
-    else:
-        form = TeacherForm()
-
+    try:
+        if request.method == 'POST':
+            form = TeacherForm(request.POST, request.FILES)
+            if form.is_valid():
+                teacher = form.save(commit=False)
+                teacher.created_by = request.user
+                teacher.save()
+                messages.success(request, 'Teacher added successfully.')
+                return redirect('home:getTeachers')
+            else:
+                messages.error(request, 'Please correct the errors below.')
+        else:
+            form = TeacherForm()
+    
+    except ValidationError as e:
+        messages.error(request, f'Validation error: {e}')
+        logger.error(f"Validation error while adding a new teacher: {e}")
+    
+    except Exception as e:
+        messages.error(request, 'An unexpected error occurred. Please try again later.')
+        logger.error(f"Unexpected error while adding a new teacher: {e}")
+    
     context = {
         'form': form
     }
@@ -210,7 +223,11 @@ def editTeacher(request, employee_id):
                 messages.success(request, 'Teacher updated successfully.')
                 return redirect('home:viewTeacher', employee_id=teacher.employee_id)
             else:
-                messages.error(request, 'Please correct the errors below.')
+                # Iterate through form errors and provide field-specific messages
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
+                logger.warning(f"Form validation errors while updating teacher {employee_id}: {form.errors}")
         else:
             form = TeacherForm(instance=teacher)
     
