@@ -570,15 +570,20 @@ def addClass(request, academic_year_id):
                 messages.success(request, 'Class added successfully.')
                 return redirect('home:getClasses')
             else:
+                # Iterate through form errors and provide field-specific messages
                 for field, errors in form.errors.items():
                     for error in errors:
                         messages.error(request, f"{field.capitalize()}: {error}")
+                logger.warning(f"Form validation errors while adding a new class: {form.errors}")
         except IntegrityError:
             messages.error(request, 'A class with the same grade, section, and academic year already exists.')
+            logger.error(f"Integrity error while adding class in academic year {academic_year_id}")
         except ValidationError as e:
             messages.error(request, f"Validation error: {e}")
+            logger.error(f"Validation error while adding class in academic year {academic_year_id}: {e}")
         except Exception as e:
-            messages.error(request, f"An unexpected error occurred: {e}")
+            messages.error(request, 'An unexpected error occurred. Please try again later.')
+            logger.error(f"Unexpected error while adding class in academic year {academic_year_id}: {e}")
     else:
         form = ClassForm(initial={'academic_year': academic_year})
     
@@ -652,15 +657,20 @@ def editClass(request, id):
                 messages.success(request, 'Class updated successfully.')
                 return redirect('home:viewClass', id=updated_class.id)
             else:
+                # Iterate through form errors and provide field-specific messages
                 for field, errors in form.errors.items():
                     for error in errors:
                         messages.error(request, f"{field.capitalize()}: {error}")
+                logger.warning(f"Form validation errors while updating class {id}: {form.errors}")
         except IntegrityError:
             messages.error(request, 'A class with the same grade, section, and academic year already exists.')
+            logger.error(f"Integrity error while updating class {id}")
         except ValidationError as e:
             messages.error(request, f"Validation error: {e}")
+            logger.error(f"Validation error while updating class {id}: {e}")
         except Exception as e:
-            messages.error(request, f"An unexpected error occurred: {e}")
+            messages.error(request, 'An unexpected error occurred. Please try again later.')
+            logger.error(f"Unexpected error while updating class {id}: {e}")
     else:
         form = ClassForm(instance=class_obj)
     
