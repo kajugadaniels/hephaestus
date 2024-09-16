@@ -1,3 +1,4 @@
+import logging
 from home.models import *
 from account.forms import *
 from django.contrib import messages
@@ -5,6 +6,8 @@ from django.shortcuts import render, redirect
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login as auth_login, logout
+
+logger = logging.getLogger(__name__)
 
 def user_login(request):
     if request.user.is_authenticated:
@@ -29,7 +32,11 @@ def user_login(request):
             else:
                 messages.error(request, _('Invalid phone number or password'))
         else:
-            messages.error(request, _("Please correct the error below."))
+            # Log and show form validation errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field.capitalize()}: {error}")
+            logger.warning(f"Login form validation errors: {form.errors}")
     else:
         form = LoginForm()
 

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title> HEPHAESTUS - Login </title>
+    <title>HEPHAESTUS - Login</title>
     <meta name="Description" content="School management system">
     <meta name="Author" content="KAJUGA Daniels">
     <meta name="keywords" content="">
@@ -14,6 +14,36 @@
     <link id="style" href="{% static 'libs/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" >
     <link href="{% static 'css/styles.min.css' %}" rel="stylesheet" >
     <link rel="stylesheet" href="{% static 'libs/swiper/swiper-bundle.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"> <!-- Toastr CSS -->
+    <style>
+        .toast-success {
+            background-color: #51A351 !important;
+            color: white;
+        }
+        .toast-error {
+            background-color: #D9534F !important;
+            color: white;
+        }
+        .toast-warning {
+            background-color: #F0AD4E !important;
+            color: white;
+        }
+        .toast-info {
+            background-color: #5BC0DE !important;
+            color: white;
+        }
+        .toast {
+            animation: fadeInDown 0.5s, fadeOutUp 0.5s 4.5s;
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOutUp {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-50px); }
+        }
+    </style>
 </head>
 
 <body class="bg-white">
@@ -124,7 +154,38 @@
     <script src="{% static 'libs/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'libs/swiper/swiper-bundle.min.js' %}"></script>
     <script src="{% static 'js/authentication.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script> <!-- Toastr JS -->
+    <script>
+        $(document).ready(function() {
+            // Toastr options
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": true,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut",
+                "toastClass": 'toast animated'
+            };
 
+            // Display Django messages using Toastr
+            {% if messages %}
+                {% for message in messages %}
+                    var toastrType = "{{ message.tags }}";  // info, success, warning, error
+                    toastr[toastrType]("{{ message.message|escapejs }}");
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
 </body>
-
 </html>
