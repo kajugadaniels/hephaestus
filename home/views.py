@@ -160,7 +160,11 @@ def deleteStudent(request, slug):
 @login_required
 def getTeachers(request):
     teachers = Teacher.objects.filter(delete_status=False).order_by('-created_at')
-    return render(request, 'pages/teachers/index.html', {'teachers': teachers})
+
+    context = {
+        'teachers': teachers
+    }
+    return render(request, 'pages/teachers/index.html', context)
 
 @login_required
 def addTeacher(request):
