@@ -15,13 +15,13 @@ def user_login(request):
         if form.is_valid():
             phone_number = form.cleaned_data.get('phone_number')
             password = form.cleaned_data.get('password')
-            academic_year_id = form.cleaned_data.get('academic_year')
+            academic_year_id = form.cleaned_data.get('academic_year').id  # Get the ID, not the object
             user = authenticate(request, phone_number=phone_number, password=password)
 
             if user is not None:
                 if user.is_active:
                     auth_login(request, user)
-                    request.session['academic_year_id'] = academic_year_id
+                    request.session['academic_year_id'] = academic_year_id  # Store only the ID
                     messages.success(request, _('Login successful!'))
                     return redirect('home:dashboard')
                 else:
