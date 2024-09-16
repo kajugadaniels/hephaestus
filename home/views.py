@@ -200,7 +200,7 @@ def viewTeacher(request, employee_id):
 def editTeacher(request, employee_id):
     teacher = get_object_or_404(Teacher, employee_id=employee_id, delete_status=False)
     if request.method == 'POST':
-        form = TeacherForm(request.POST, instance=teacher)
+        form = TeacherForm(request.POST, request.FILES, instance=teacher)
         if form.is_valid():
             teacher = form.save(commit=False)
             teacher.updated_by = request.user
@@ -209,7 +209,14 @@ def editTeacher(request, employee_id):
             return redirect('home:viewTeacher', employee_id=teacher.employee_id)
     else:
         form = TeacherForm(instance=teacher)
-    return render(request, 'pages/teachers/edit.html', {'form': form, 'teacher': teacher})
+
+    context = {
+        'form': form,
+        'teacher': teacher
+    }
+
+    return render(request, 'pages/teachers/edit.html', context)
+
 
 @login_required
 def deleteTeacher(request, employee_id):
