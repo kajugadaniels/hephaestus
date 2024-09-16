@@ -217,7 +217,6 @@ def editTeacher(request, employee_id):
 
     return render(request, 'pages/teachers/edit.html', context)
 
-
 @login_required
 def deleteTeacher(request, employee_id):
     teacher = get_object_or_404(Teacher, employee_id=employee_id, delete_status=False)

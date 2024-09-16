@@ -215,7 +215,6 @@ class Teacher(models.Model):
         self.delete_status = True
         self.save()
 
-
 class AcademicYear(models.Model):
     name = models.CharField(max_length=9, unique=True, null=True, blank=True)
     start_date = models.DateField(null=True, blank=True)

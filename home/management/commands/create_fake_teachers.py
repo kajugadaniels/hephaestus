@@ -5,11 +5,8 @@ from django.utils.text import slugify
 from django.core.files.base import ContentFile
 from PIL import Image
 import io
-from django.contrib.auth import get_user_model
-from home.models import Teacher
 from django.utils import timezone
-
-User = get_user_model()
+from home.models import Teacher
 
 class Command(BaseCommand):
     help = 'Create fake teacher entries'
@@ -19,21 +16,11 @@ class Command(BaseCommand):
 
         # Create 10 fake teachers
         for _ in range(10):
-            # Create a User first
             name = fake.name()
             email = fake.email()
             phone_number = fake.phone_number()
-            password = 'password123'  # You might want to generate a random password
 
-            user = User.objects.create_user(
-                name=name,
-                email=email,
-                phone_number=phone_number,
-                password=password,
-                role='Teacher'
-            )
-
-            # Now create the Teacher profile
+            # Create the Teacher profile
             employee_id = f"T{fake.unique.random_number(digits=5)}"
             date_of_birth = fake.date_of_birth(minimum_age=25, maximum_age=65)
             gender = random.choice(['Male', 'Female'])
@@ -68,7 +55,9 @@ class Command(BaseCommand):
             img_byte_arr = img_byte_arr.getvalue()
 
             teacher = Teacher(
-                user=user,
+                name=name,
+                email=email,
+                phone_number=phone_number,
                 employee_id=employee_id,
                 date_of_birth=date_of_birth,
                 gender=gender,
@@ -101,6 +90,6 @@ class Command(BaseCommand):
             teacher.save()
 
             # Save the image
-            user.image.save(f'teacher_{slugify(name)}_{date_of_birth}_{gender}.jpeg', ContentFile(img_byte_arr))
+            teacher.image.save(f'teacher_{slugify(name)}_{date_of_birth}_{gender}.jpeg', ContentFile(img_byte_arr))
 
         self.stdout.write(self.style.SUCCESS('Successfully created 10 fake teachers'))
