@@ -25,17 +25,17 @@ urlpatterns = [
     path('teacher/<str:employee_id>/edit/', editTeacher, name='editTeacher'),
     path('teacher/<str:employee_id>/delete/', deleteTeacher, name='deleteTeacher'),
 
-    path('terms/', getTerms, name='getTerms'),
-    path('term/add/', addTerm, name='addTerm'),
-    path('term/<int:id>/', viewTerm, name='viewTerm'),
-    path('term/<int:id>/edit/', editTerm, name='editTerm'),
-    path('term/<int:id>/delete/', deleteTerm, name='deleteTerm'),
-
     path('academic-years/', getAcademicYears, name='getAcademicYears'),
     path('academic-year/add/', addAcademicYear, name='addAcademicYear'),
     path('academic-year/<int:id>/', viewAcademicYear, name='viewAcademicYear'),
     path('academic-year/<int:id>/edit/', editAcademicYear, name='editAcademicYear'),
     path('academic-year/<int:id>/delete/', deleteAcademicYear, name='deleteAcademicYear'),
+
+    path('terms/', getTerms, name='getTerms'),
+    path('term/add/', addTerm, name='addTerm'),
+    path('term/<int:id>/', viewTerm, name='viewTerm'),
+    path('term/<int:id>/edit/', editTerm, name='editTerm'),
+    path('term/<int:id>/delete/', deleteTerm, name='deleteTerm'),
 
     path('classes/', getClasses, name='getClasses'),
     path('class/add/<str:academic_year_id>', addClass, name='addClass'),

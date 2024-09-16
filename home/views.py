@@ -299,6 +299,124 @@ def deleteTeacher(request, employee_id):
     return redirect('home:getTeachers')
 
 @login_required
+def getAcademicYears(request):
+    academic_years = AcademicYear.objects.filter(delete_status=False).order_by('-created_at')
+    today = timezone.now().date()
+
+    for year in academic_years:
+        if year.start_date and year.end_date:
+            if today < year.start_date:
+                year.status = "Not Started"
+            elif year.start_date <= today <= year.end_date:
+                year.status = "Ongoing"
+            else:
+                year.status = "Finished"
+        else:
+            year.status = "Dates not set"
+
+    context = {
+        'academic_years': academic_years
+    }
+
+    return render(request, 'pages/academicYears/index.html', context)
+
+@login_required
+def addAcademicYear(request):
+    try:
+        if request.method == 'POST':
+            form = AcademicYearForm(request.POST)
+            if form.is_valid():
+                academic_year = form.save(commit=False)
+                academic_year.created_by = request.user
+                academic_year.save()
+                messages.success(request, 'Academic Year added successfully.')
+                return redirect('home:getAcademicYears')
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
+                logger.warning(f"Form validation errors while adding a new academic year: {form.errors}")
+        else:
+            form = AcademicYearForm()
+    
+    except ValidationError as e:
+        messages.error(request, f'Validation error: {e}')
+        logger.error(f"Validation error while adding a new academic year: {e}")
+    
+    except Exception as e:
+        messages.error(request, 'An unexpected error occurred. Please try again later.')
+        logger.error(f"Unexpected error while adding a new academic year: {e}")
+    
+    context = {
+        'form': form
+    }
+
+    return render(request, 'pages/academicYears/create.html', context)
+
+@login_required
+def viewAcademicYear(request, id):
+    academic_year = get_object_or_404(AcademicYear, id=id, delete_status=False)
+    classes = Class.objects.filter(academic_year=academic_year, delete_status=False)
+
+    context = {
+        'academic_year': academic_year,
+        'classes': classes,
+    }
+
+    return render(request, 'pages/academicYears/show.html', context)
+
+@login_required
+def editAcademicYear(request, id):
+    try:
+        academic_year = get_object_or_404(AcademicYear, id=id, delete_status=False)
+        
+        if request.method == 'POST':
+            form = AcademicYearForm(request.POST, instance=academic_year)
+            if form.is_valid():
+                academic_year = form.save(commit=False)
+                academic_year.updated_by = request.user
+                academic_year.save()
+                messages.success(request, 'Academic Year updated successfully.')
+                return redirect('home:viewAcademicYear', id=academic_year.id)
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
+                logger.warning(f"Form validation errors while updating academic year {id}: {form.errors}")
+        else:
+            form = AcademicYearForm(instance=academic_year)
+    
+    except ValidationError as e:
+        messages.error(request, f'Validation error: {e}')
+        logger.error(f"Validation error while updating academic year {id}: {e}")
+    
+    except AcademicYear.DoesNotExist:
+        messages.error(request, 'The requested academic year does not exist.')
+        logger.error(f"Academic Year with ID {id} does not exist.")
+        return redirect('home:getAcademicYears')
+    
+    except Exception as e:
+        messages.error(request, 'An unexpected error occurred. Please try again later.')
+        logger.error(f"Unexpected error while editing academic year {id}: {e}")
+    
+    context = {
+        'form': form,
+        'academic_year': academic_year
+    }
+
+    return render(request, 'pages/academicYears/edit.html', context)
+
+
+@login_required
+def deleteAcademicYear(request, id):
+    academic_year = get_object_or_404(AcademicYear, id=id, delete_status=False)
+    academic_year.delete_status = True
+    academic_year.updated_by = request.user
+    academic_year.save()
+    messages.success(request, 'Academic Year deleted successfully.')
+    return redirect('home:getAcademicYears')
+
+@login_required
 def getTerms(request):
     terms = Term.objects.filter(delete_status=False).order_by('-created_at')
 
@@ -399,90 +517,6 @@ def deleteTerm(request, id):
     term.save()
     messages.success(request, 'Term deleted successfully.')
     return redirect('home:getTerms')
-
-@login_required
-@login_required
-def getAcademicYears(request):
-    academic_years = AcademicYear.objects.filter(delete_status=False).order_by('-created_at')
-    today = timezone.now().date()
-
-    for year in academic_years:
-        if year.start_date and year.end_date:
-            if today < year.start_date:
-                year.status = "Not Started"
-            elif year.start_date <= today <= year.end_date:
-                year.status = "Ongoing"
-            else:
-                year.status = "Finished"
-        else:
-            year.status = "Dates not set"
-
-    context = {
-        'academic_years': academic_years
-    }
-
-    return render(request, 'pages/academicYears/index.html', context)
-
-@login_required
-def addAcademicYear(request):
-    if request.method == 'POST':
-        form = AcademicYearForm(request.POST)
-        if form.is_valid():
-            academic_year = form.save(commit=False)
-            academic_year.created_by = request.user
-            academic_year.save()
-            messages.success(request, 'Academic Year added successfully.')
-            return redirect('home:getAcademicYears')
-    else:
-        form = AcademicYearForm()
-
-    context = {
-        'form': form
-    }
-
-    return render(request, 'pages/academicYears/create.html', context)
-
-@login_required
-def viewAcademicYear(request, id):
-    academic_year = get_object_or_404(AcademicYear, id=id, delete_status=False)
-    classes = Class.objects.filter(academic_year=academic_year, delete_status=False)
-
-    context = {
-        'academic_year': academic_year,
-        'classes': classes,
-    }
-
-    return render(request, 'pages/academicYears/show.html', context)
-
-@login_required
-def editAcademicYear(request, id):
-    academic_year = get_object_or_404(AcademicYear, id=id, delete_status=False)
-    if request.method == 'POST':
-        form = AcademicYearForm(request.POST, instance=academic_year)
-        if form.is_valid():
-            academic_year = form.save(commit=False)
-            academic_year.updated_by = request.user
-            academic_year.save()
-            messages.success(request, 'Academic Year updated successfully.')
-            return redirect('home:viewAcademicYear', id=academic_year.id)
-    else:
-        form = AcademicYearForm(instance=academic_year)
-
-    context = {
-        'form': form,
-        'academic_year': academic_year
-    }
-
-    return render(request, 'pages/academicYears/edit.html', context)
-
-@login_required
-def deleteAcademicYear(request, id):
-    academic_year = get_object_or_404(AcademicYear, id=id, delete_status=False)
-    academic_year.delete_status = True
-    academic_year.updated_by = request.user
-    academic_year.save()
-    messages.success(request, 'Academic Year deleted successfully.')
-    return redirect('home:getAcademicYears')
 
 @login_required
 def getClasses(request):
