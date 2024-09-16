@@ -169,17 +169,20 @@ def getTeachers(request):
 @login_required
 def addTeacher(request):
     if request.method == 'POST':
-        form = TeacherForm(request.POST)
+        form = TeacherForm(request.POST, request.FILES)
         if form.is_valid():
             teacher = form.save(commit=False)
-            teacher.user = request.user
             teacher.created_by = request.user
             teacher.save()
             messages.success(request, 'Teacher added successfully.')
             return redirect('home:getTeachers')
     else:
         form = TeacherForm()
-    return render(request, 'pages/teachers/create.html', {'form': form})
+
+    context = {
+        'form': form
+    }
+    return render(request, 'pages/teachers/create.html', context)
 
 @login_required
 def viewTeacher(request, employee_id):
