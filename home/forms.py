@@ -76,13 +76,20 @@ class StudentForm(forms.ModelForm):
 class TeacherForm(forms.ModelForm):
     class Meta:
         model = Teacher
-        fields = ['employee_id', 'date_of_birth', 'gender', 'nationality', 'national_id', 'marital_status',
-                  'alternative_phone_number', 'address', 'position', 'department', 'employment_status',
-                  'date_joined', 'years_of_experience', 'highest_degree', 'major', 'institution',
-                  'graduation_year', 'certifications', 'skills', 'subjects_taught', 'classes_assigned',
-                  'emergency_contact_name', 'emergency_contact_relationship', 'emergency_contact_phone',
-                  'bio', 'achievements']
+        fields = [
+            'name', 'email', 'phone_number', 'image',
+            'employee_id', 'date_of_birth', 'gender', 'nationality', 'national_id', 'marital_status',
+            'alternative_phone_number', 'address', 'position', 'department', 'employment_status',
+            'date_joined', 'years_of_experience', 'highest_degree', 'major', 'institution',
+            'graduation_year', 'certifications', 'skills', 'subjects_taught', 'classes_assigned',
+            'emergency_contact_name', 'emergency_contact_relationship', 'emergency_contact_phone',
+            'bio', 'achievements'
+        ]
         widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
+            'image': forms.FileInput(attrs={'class': 'form-control'}),
             'employee_id': forms.TextInput(attrs={'class': 'form-control', 'required': 'true'}),
             'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': 'true'}),
             'gender': forms.Select(attrs={'class': 'form-control select2', 'required': 'true'}),
@@ -110,6 +117,7 @@ class TeacherForm(forms.ModelForm):
             'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Optional'}),
             'achievements': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Optional'}),
         }
+
 
 class TermForm(forms.ModelForm):
     class Meta:
