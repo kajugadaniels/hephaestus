@@ -10,7 +10,11 @@
                 <a href="javascript:void(0);" class="header-link dropdown-toggle" id="mainHeaderProfile" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                     <div class="d-flex align-items-center">
                         <div class="me-sm-2 me-0">
-                            <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" alt="img" width="32" height="32" class="rounded-circle">
+                            {% if request.user.image and request.user.image.url %}
+                                <img src="{{ request.user.image.url }}" alt="Profile Image" width="32" height="32" class="rounded-circle">
+                            {% else %}
+                                <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" alt="Default Profile Image" width="32" height="32" class="rounded-circle">
+                            {% endif %}
                         </div>
                         <div class="d-sm-block d-none">
                             <p class="fw-semibold mb-0 lh-1">{{ request.user.name }}</p>

@@ -109,6 +109,10 @@ def update_class_on_student_change(sender, instance, **kwargs):
             class_obj.capacity = class_obj.students.count()
             class_obj.save()
 
+def teacher_image_path(instance, filename):
+    base_filename, file_extension = os.path.splitext(filename)
+    return f'teachers/teacher_{slugify(instance.name)}_{instance.employee_id}_{instance.phone_number}{file_extension}'
+
 class Teacher(models.Model):
     GENDER_CHOICES = (
         ('Male', 'Male'),
@@ -130,9 +134,17 @@ class Teacher(models.Model):
         ('Temporary', 'Temporary'),
     )
 
-    # Link to User model
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='teacher_profile')
-    
+    name = models.CharField(max_length=255, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+    phone_number = models.CharField(max_length=15, null=True, blank=True)
+    image = ProcessedImageField(
+        upload_to=teacher_image_path,
+        processors=[ResizeToFill(720, 720)],
+        format='JPEG',
+        options={'quality': 90},
+        null=True, blank=True
+    )
+
     # Personal Information
     employee_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
@@ -140,73 +152,59 @@ class Teacher(models.Model):
     nationality = models.CharField(max_length=50, null=True, blank=True)
     national_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     marital_status = models.CharField(max_length=20, choices=MARITAL_STATUS_CHOICES, null=True, blank=True)
-    
+
     # Contact Information
     alternative_phone_number = models.CharField(max_length=15, blank=True, null=True)
     address = models.TextField(null=True, blank=True)
-    
+
     # Professional Information
     position = models.CharField(max_length=100, null=True, blank=True)
     department = models.CharField(max_length=100, null=True, blank=True)
     employment_status = models.CharField(max_length=20, choices=EMPLOYMENT_STATUS_CHOICES, null=True, blank=True)
     date_joined = models.DateField(null=True, blank=True)
     years_of_experience = models.PositiveIntegerField(null=True, blank=True)
-    
+
     # Qualifications
     highest_degree = models.CharField(max_length=100, null=True, blank=True)
     major = models.CharField(max_length=100, null=True, blank=True)
     institution = models.CharField(max_length=200, null=True, blank=True)
     graduation_year = models.PositiveIntegerField(null=True, blank=True)
-    
+
     # Additional Qualifications
     certifications = models.TextField(null=True, blank=True)
     skills = models.TextField(null=True, blank=True)
-    
+
     # Teaching Information
     subjects_taught = models.TextField(null=True, blank=True)
     classes_assigned = models.TextField(null=True, blank=True)
-    
+
     # Emergency Contact
     emergency_contact_name = models.CharField(max_length=100, null=True, blank=True)
     emergency_contact_relationship = models.CharField(max_length=50, null=True, blank=True)
     emergency_contact_phone = models.CharField(max_length=15, null=True, blank=True)
-    
+
     # Additional Information
     bio = models.TextField(null=True, blank=True)
     achievements = models.TextField(null=True, blank=True)
-    
+
     # System Fields
     delete_status = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='teachers_created')
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='teachers_updated')
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='teachers_created')
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='teachers_updated')
 
     def __str__(self):
-        return self.user.name
+        return self.name
 
     class Meta:
-        ordering = ['user__name']
+        ordering = ['name']
         indexes = [
             models.Index(fields=['employee_id']),
             models.Index(fields=['national_id']),
         ]
-
-    @property
-    def name(self):
-        return self.user.name
-
-    @property
-    def email(self):
-        return self.user.email
-
-    @property
-    def phone_number(self):
-        return self.user.phone_number
-
-    @property
-    def image(self):
-        return self.user.image
 
     @property
     def age(self):
@@ -217,8 +215,9 @@ class Teacher(models.Model):
         self.delete_status = True
         self.save()
 
+
 class AcademicYear(models.Model):
-    name = models.CharField(max_length=9, unique=True, null=True, blank=True)  # e.g., "2023-2024"
+    name = models.CharField(max_length=9, unique=True, null=True, blank=True)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
 
