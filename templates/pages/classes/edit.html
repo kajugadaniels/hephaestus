@@ -21,33 +21,33 @@
                     <form method="post">
                         {% csrf_token %}
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
                                 {{ form.name }}
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label for="{{ form.grade.id_for_label }}" class="form-label">Grade</label>
                                 {{ form.grade }}
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label for="{{ form.section.id_for_label }}" class="form-label">Section</label>
                                 {{ form.section }}
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label for="head_teacher" class="form-label">Head Teacher</label>
                                 <select class="form-control" name="head_teacher" id="choices-multiple-remove-button">
                                     {% for teacher in headTeachers %}
                                         <option value="{{ teacher.id }}" {% if teacher.id == class.head_teacher.id %}selected{% endif %}>
-                                            {{ teacher.user.name }}
+                                            {{ teacher.name }}
                                         </option>
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label for="{{ form.capacity.id_for_label }}" class="form-label">Capacity</label>
                                 <input type="number" id="id_capacity" name="capacity" class="form-control" value="{{ class.capacity }}" readonly>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label for="{{ form.academic_year.id_for_label }}" class="form-label">Academic Year</label>
                                 <select class="form-control" data-trigger name="academic_year" id="choices-multiple-default">
                                     <option value="{{ academic_year.id }}" selected>{{ academic_year.name }}</option>
