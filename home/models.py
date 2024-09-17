@@ -385,6 +385,15 @@ class ClassSubject(models.Model):
         self.full_clean()
         super().save(*args, **kwargs)
 
+class TeacherAttendance(models.Model):
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE)
+    date = models.DateField()
+    status = models.BooleanField()
+
+    class Meta:
+        unique_together = ('teacher', 'academic_year', 'date')
+
 class Attendance(models.Model):
     ATTENDANCE_CHOICES = [
         ('present', 'Present'),
