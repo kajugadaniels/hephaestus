@@ -204,7 +204,8 @@ def deleteAcademicYear(request, id):
 
 @login_required
 def getTerms(request):
-    terms = Term.objects.filter(delete_status=False).order_by('-created_at')
+    academic_year = request.session.get('academic_year_id')
+    terms = Term.objects.filter(academic_year_id=academic_year, delete_status=False).order_by('-created_at')
 
     context = {
         'terms': terms
@@ -212,12 +213,15 @@ def getTerms(request):
 
     return render(request, 'pages/terms/index.html', context)
 
+@login_required
 def addTerm(request):
+    academic_year = request.session.get('academic_year_id')
     try:
         if request.method == 'POST':
             form = TermForm(request.POST)
             if form.is_valid():
                 term = form.save(commit=False)
+                term.academic_year_id = academic_year
                 term.created_by = request.user
                 term.save()
                 messages.success(request, 'Term added successfully.')
@@ -246,7 +250,8 @@ def addTerm(request):
 
 @login_required
 def viewTerm(request, id):
-    term = get_object_or_404(Term, id=id, delete_status=False)
+    academic_year = request.session.get('academic_year_id')
+    term = get_object_or_404(Term, id=id, academic_year_id=academic_year, delete_status=False)
 
     context = {
         'term': term
@@ -256,8 +261,9 @@ def viewTerm(request, id):
 
 @login_required
 def editTerm(request, id):
+    academic_year = request.session.get('academic_year_id')
     try:
-        term = get_object_or_404(Term, id=id, delete_status=False)
+        term = get_object_or_404(Term, id=id, academic_year_id=academic_year, delete_status=False)
         
         if request.method == 'POST':
             form = TermForm(request.POST, instance=term)
@@ -297,12 +303,14 @@ def editTerm(request, id):
 
 @login_required
 def deleteTerm(request, id):
-    term = get_object_or_404(Term, id=id, delete_status=False)
+    academic_year = request.session.get('academic_year_id')
+    term = get_object_or_404(Term, id=id, academic_year_id=academic_year, delete_status=False)
     term.delete_status = True
     term.updated_by = request.user
     term.save()
     messages.success(request, 'Term deleted successfully.')
     return redirect('home:getTerms')
+
 
 @login_required
 def getTeachers(request):
