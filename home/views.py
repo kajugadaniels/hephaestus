@@ -214,14 +214,13 @@ def getTerms(request):
     return render(request, 'pages/terms/index.html', context)
 
 @login_required
-def addTerm(request):
-    academic_year = request.session.get('academic_year_id')
+def addTerm(request, academic_year_id):
     try:
         if request.method == 'POST':
             form = TermForm(request.POST)
             if form.is_valid():
                 term = form.save(commit=False)
-                term.academic_year_id = academic_year
+                term.academic_year_id = academic_year_id
                 term.created_by = request.user
                 term.save()
                 messages.success(request, 'Term added successfully.')

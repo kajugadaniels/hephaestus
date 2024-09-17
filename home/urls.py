@@ -32,7 +32,7 @@ urlpatterns = [
     path('academic-year/<int:id>/delete/', deleteAcademicYear, name='deleteAcademicYear'),
 
     path('terms/', getTerms, name='getTerms'),
-    path('term/add/', addTerm, name='addTerm'),
+    path('term/add/<int:academic_year_id>/', addTerm, name='addTerm'),
     path('term/<int:id>/', viewTerm, name='viewTerm'),
     path('term/<int:id>/edit/', editTerm, name='editTerm'),
     path('term/<int:id>/delete/', deleteTerm, name='deleteTerm'),
