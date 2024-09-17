@@ -306,7 +306,13 @@ def deleteTerm(request, id):
 
 @login_required
 def getTeachers(request):
-    teachers = Teacher.objects.filter(delete_status=False).order_by('-created_at')
+    academic_year_id = request.session.get('academic_year_id')
+
+    if academic_year_id is None:
+        messages.error(request, 'Please select an academic year.')
+        return redirect('home:user_login')
+
+    teachers = Teacher.objects.filter(delete_status=False, academic_year_id=academic_year_id).order_by('-created_at')
 
     context = {
         'teachers': teachers
@@ -317,11 +323,18 @@ def getTeachers(request):
 @login_required
 def addTeacher(request):
     try:
+        academic_year_id = request.session.get('academic_year_id')
+
+        if academic_year_id is None:
+            messages.error(request, 'Please select an academic year.')
+            return redirect('home:user_login')
+
         if request.method == 'POST':
             form = TeacherForm(request.POST, request.FILES)
             if form.is_valid():
                 teacher = form.save(commit=False)
                 teacher.created_by = request.user
+                teacher.academic_year_id = academic_year_id
                 teacher.save()
                 messages.success(request, 'Teacher added successfully.')
                 return redirect('home:getTeachers')
@@ -332,15 +345,15 @@ def addTeacher(request):
                 logger.warning(f"Form validation errors while adding a new teacher: {form.errors}")
         else:
             form = TeacherForm()
-    
+
     except ValidationError as e:
         messages.error(request, f'Validation error: {e}')
         logger.error(f"Validation error while adding a new teacher: {e}")
-    
+
     except Exception as e:
         messages.error(request, 'An unexpected error occurred. Please try again later.')
         logger.error(f"Unexpected error while adding a new teacher: {e}")
-    
+
     context = {
         'form': form
     }
@@ -349,7 +362,13 @@ def addTeacher(request):
 
 @login_required
 def viewTeacher(request, employee_id):
-    teacher = get_object_or_404(Teacher, employee_id=employee_id, delete_status=False)
+    academic_year_id = request.session.get('academic_year_id')
+
+    if academic_year_id is None:
+        messages.error(request, 'Please select an academic year.')
+        return redirect('home:user_login')
+
+    teacher = get_object_or_404(Teacher, employee_id=employee_id, delete_status=False, academic_year_id=academic_year_id)
 
     context = {
         'teacher': teacher
@@ -357,11 +376,18 @@ def viewTeacher(request, employee_id):
 
     return render(request, 'pages/teachers/show.html', context)
 
+
 @login_required
 def editTeacher(request, employee_id):
     try:
-        teacher = get_object_or_404(Teacher, employee_id=employee_id, delete_status=False)
-        
+        academic_year_id = request.session.get('academic_year_id')
+
+        if academic_year_id is None:
+            messages.error(request, 'Please select an academic year.')
+            return redirect('home:user_login')
+
+        teacher = get_object_or_404(Teacher, employee_id=employee_id, delete_status=False, academic_year_id=academic_year_id)
+
         if request.method == 'POST':
             form = TeacherForm(request.POST, request.FILES, instance=teacher)
             if form.is_valid():
@@ -371,27 +397,26 @@ def editTeacher(request, employee_id):
                 messages.success(request, 'Teacher updated successfully.')
                 return redirect('home:viewTeacher', employee_id=teacher.employee_id)
             else:
-                # Iterate through form errors and provide field-specific messages
                 for field, errors in form.errors.items():
                     for error in errors:
                         messages.error(request, f"{field}: {error}")
                 logger.warning(f"Form validation errors while updating teacher {employee_id}: {form.errors}")
         else:
             form = TeacherForm(instance=teacher)
-    
+
     except ValidationError as e:
         messages.error(request, f'Validation error: {e}')
         logger.error(f"Validation error while updating teacher {employee_id}: {e}")
-    
+
     except Teacher.DoesNotExist:
         messages.error(request, 'The requested teacher does not exist.')
         logger.error(f"Teacher with employee_id {employee_id} does not exist.")
         return redirect('home:getTeachers')
-    
+
     except Exception as e:
         messages.error(request, 'An unexpected error occurred. Please try again later.')
         logger.error(f"Unexpected error while editing teacher {employee_id}: {e}")
-    
+
     context = {
         'form': form,
         'teacher': teacher
@@ -401,12 +426,20 @@ def editTeacher(request, employee_id):
 
 @login_required
 def deleteTeacher(request, employee_id):
-    teacher = get_object_or_404(Teacher, employee_id=employee_id, delete_status=False)
+    academic_year_id = request.session.get('academic_year_id')
+
+    if academic_year_id is None:
+        messages.error(request, 'Please select an academic year.')
+        return redirect('home:user_login')
+
+    teacher = get_object_or_404(Teacher, employee_id=employee_id, delete_status=False, academic_year_id=academic_year_id)
+
     teacher.delete_status = True
     teacher.updated_by = request.user
     teacher.save()
     messages.success(request, 'Teacher deleted successfully.')
     return redirect('home:getTeachers')
+
 
 @login_required
 def getStudents(request):
