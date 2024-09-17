@@ -118,8 +118,9 @@ class StudentForm(forms.ModelForm):
 class TermForm(forms.ModelForm):
     class Meta:
         model = Term
-        fields = ['name', 'start_date', 'end_date']
+        fields = ['academic_year', 'name', 'start_date', 'end_date']
         widgets = {
+            'academic_year': forms.Select(attrs={'class': 'form-control', 'required': 'true'}),
             'name': forms.Select(attrs={'class': 'form-control select2', 'required': 'true'}),
             'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': 'true'}),
             'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': 'true'}),

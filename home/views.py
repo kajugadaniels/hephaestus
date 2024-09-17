@@ -214,13 +214,14 @@ def getTerms(request):
     return render(request, 'pages/terms/index.html', context)
 
 @login_required
-def addTerm(request, academic_year_id):
+def addTerm(request):
+    academic_year = request.session.get('academic_year_id')
     try:
         if request.method == 'POST':
             form = TermForm(request.POST)
             if form.is_valid():
                 term = form.save(commit=False)
-                term.academic_year_id = academic_year_id
+                term.academic_year_id = academic_year
                 term.created_by = request.user
                 term.save()
                 messages.success(request, 'Term added successfully.')
@@ -231,7 +232,7 @@ def addTerm(request, academic_year_id):
                         messages.error(request, f"{field}: {error}")
                 logger.warning(f"Form validation errors while adding a new term: {form.errors}")
         else:
-            form = TermForm(initial={'academic_year': academic_year_id})
+            form = TermForm()
     
     except ValidationError as e:
         messages.error(request, f'Validation error: {e}')
@@ -242,8 +243,7 @@ def addTerm(request, academic_year_id):
         logger.error(f"Unexpected error while adding a new term: {e}")
     
     context = {
-        'form': form,
-        'academic_year_id': academic_year_id
+        'form': form
     }
 
     return render(request, 'pages/terms/create.html', context)
