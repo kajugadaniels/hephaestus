@@ -780,7 +780,8 @@ def deleteClass(request, id):
 
 @login_required
 def getSubjects(request):
-    subjects = Subject.objects.filter(delete_status=False).order_by('-created_at')
+    academic_year_id = request.session.get('academic_year_id')
+    subjects = Subject.objects.filter(academic_year_id=academic_year_id, delete_status=False).order_by('-created_at')
 
     context = {
         'subjects': subjects
@@ -790,12 +791,14 @@ def getSubjects(request):
 
 @login_required
 def addSubject(request):
+    academic_year_id = request.session.get('academic_year_id')
     if request.method == 'POST':
         form = SubjectForm(request.POST)
         try:
             if form.is_valid():
                 subject = form.save(commit=False)
                 subject.created_by = request.user
+                subject.academic_year_id = academic_year_id
                 subject.save()
                 messages.success(request, 'Subject added successfully.')
                 return redirect('home:getSubjects')
@@ -824,7 +827,8 @@ def addSubject(request):
 
 @login_required
 def viewSubject(request, id):
-    subject = get_object_or_404(Subject, id=id, delete_status=False)
+    academic_year_id = request.session.get('academic_year_id')
+    subject = get_object_or_404(Subject, id=id, academic_year_id=academic_year_id, delete_status=False)
 
     context = {
         'subject': subject
@@ -832,10 +836,12 @@ def viewSubject(request, id):
 
     return render(request, 'pages/subjects/show.html', context)
 
+
 @login_required
 def editSubject(request, id):
-    subject = get_object_or_404(Subject, id=id, delete_status=False)
-    
+    academic_year_id = request.session.get('academic_year_id')
+    subject = get_object_or_404(Subject, id=id, academic_year_id=academic_year_id, delete_status=False)
+
     if request.method == 'POST':
         form = SubjectForm(request.POST, instance=subject)
         try:
@@ -846,7 +852,6 @@ def editSubject(request, id):
                 messages.success(request, 'Subject updated successfully.')
                 return redirect('home:viewSubject', id=updated_subject.id)
             else:
-                # Iterate through form errors and provide field-specific messages
                 for field, errors in form.errors.items():
                     for error in errors:
                         messages.error(request, f"{field.capitalize()}: {error}")
@@ -862,7 +867,7 @@ def editSubject(request, id):
             logger.error(f"Unexpected error while updating subject {id}: {e}")
     else:
         form = SubjectForm(instance=subject)
-    
+
     context = {
         'form': form,
         'subject': subject
@@ -872,7 +877,8 @@ def editSubject(request, id):
 
 @login_required
 def deleteSubject(request, id):
-    subject = get_object_or_404(Subject, id=id, delete_status=False)
+    academic_year_id = request.session.get('academic_year_id')
+    subject = get_object_or_404(Subject, id=id, academic_year_id=academic_year_id, delete_status=False)
     subject.delete_status = True
     subject.updated_by = request.user
     subject.save()
@@ -881,7 +887,8 @@ def deleteSubject(request, id):
 
 @login_required
 def getClassSubjects(request, class_id):
-    class_obj = get_object_or_404(Class, id=class_id, delete_status=False)
+    academic_year_id = request.session.get('academic_year_id')
+    class_obj = get_object_or_404(Class, id=class_id, delete_status=False, academic_year_id=academic_year_id)
     class_subjects = ClassSubject.objects.filter(class_group=class_obj, delete_status=False).order_by('day', 'starting_hour')
     
     # Define break and lunch times
@@ -927,7 +934,8 @@ def getClassSubjects(request, class_id):
 
 @login_required
 def assignSubjects(request, class_id):
-    class_obj = get_object_or_404(Class, id=class_id, delete_status=False)
+    academic_year_id = request.session.get('academic_year_id')
+    class_obj = get_object_or_404(Class, id=class_id, delete_status=False, academic_year_id=academic_year_id)
     
     if request.method == 'POST':
         try:
@@ -955,7 +963,6 @@ def assignSubjects(request, class_id):
                     class_subject.full_clean()
                     class_subject.save()
                 except ValidationError as e:
-                    # Log and show validation errors for the current subject assignment
                     for field, errors in e.message_dict.items():
                         for error in errors:
                             messages.error(request, f"{error}")
@@ -971,7 +978,7 @@ def assignSubjects(request, class_id):
             messages.error(request, f'An unexpected error occurred: {str(e)}')
             logger.error(f"Unexpected error while assigning subjects: {e}")
     
-    subjects = Subject.objects.filter(delete_status=False)
+    subjects = Subject.objects.filter(delete_status=False, academic_year_id=academic_year_id)
     teachers = Teacher.objects.filter(delete_status=False)
 
     context = {
@@ -984,6 +991,7 @@ def assignSubjects(request, class_id):
 
 @login_required
 def editClassSubject(request, id):
+    academic_year_id = request.session.get('academic_year_id')
     class_subject = get_object_or_404(ClassSubject, id=id, delete_status=False)
     
     if request.method == 'POST':
@@ -1003,7 +1011,6 @@ def editClassSubject(request, id):
                         messages.error(request, f"{field.capitalize()}: {error}")
                 logger.warning(f"Form validation errors while editing class_subject {id}: {form.errors}")
         except ValidationError as e:
-            # Log and show validation errors that occur during save
             for field, errors in e.message_dict.items():
                 for error in errors:
                     messages.error(request, f"{error}")
@@ -1023,7 +1030,8 @@ def editClassSubject(request, id):
 
 @login_required
 def deleteClassSubject(request, id):
-    class_subject = get_object_or_404(ClassSubject, id=id, delete_status=False)
+    academic_year_id = request.session.get('academic_year_id')
+    class_subject = get_object_or_404(ClassSubject, id=id, delete_status=False, class_group__academic_year_id=academic_year_id)
     class_subject.delete_status = True
     class_subject.save()
     messages.success(request, 'Class subject deleted successfully.')
