@@ -231,7 +231,7 @@ def addTerm(request, academic_year_id):
                         messages.error(request, f"{field}: {error}")
                 logger.warning(f"Form validation errors while adding a new term: {form.errors}")
         else:
-            form = TermForm()
+            form = TermForm(initial={'academic_year': academic_year_id})
     
     except ValidationError as e:
         messages.error(request, f'Validation error: {e}')
@@ -242,7 +242,8 @@ def addTerm(request, academic_year_id):
         logger.error(f"Unexpected error while adding a new term: {e}")
     
     context = {
-        'form': form
+        'form': form,
+        'academic_year_id': academic_year_id
     }
 
     return render(request, 'pages/terms/create.html', context)
