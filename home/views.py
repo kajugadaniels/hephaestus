@@ -86,6 +86,28 @@ def upload_image(request):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 @login_required
+def getAcademicYears(request):
+    academic_years = AcademicYear.objects.filter(delete_status=False).order_by('-created_at')
+    today = timezone.now().date()
+
+    for year in academic_years:
+        if year.start_date and year.end_date:
+            if today < year.start_date:
+                year.status = "Not Started"
+            elif year.start_date <= today <= year.end_date:
+                year.status = "Ongoing"
+            else:
+                year.status = "Finished"
+        else:
+            year.status = "Dates not set"
+
+    context = {
+        'academic_years': academic_years
+    }
+
+    return render(request, 'pages/academicYears/index.html', context)
+
+@login_required
 def addAcademicYear(request):
     try:
         if request.method == 'POST':
@@ -190,6 +212,98 @@ def getTerms(request):
 
     return render(request, 'pages/terms/index.html', context)
 
+def addTerm(request):
+    try:
+        if request.method == 'POST':
+            form = TermForm(request.POST)
+            if form.is_valid():
+                term = form.save(commit=False)
+                term.created_by = request.user
+                term.save()
+                messages.success(request, 'Term added successfully.')
+                return redirect('home:getTerms')
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
+                logger.warning(f"Form validation errors while adding a new term: {form.errors}")
+        else:
+            form = TermForm()
+    
+    except ValidationError as e:
+        messages.error(request, f'Validation error: {e}')
+        logger.error(f"Validation error while adding a new term: {e}")
+    
+    except Exception as e:
+        messages.error(request, 'An unexpected error occurred. Please try again later.')
+        logger.error(f"Unexpected error while adding a new term: {e}")
+    
+    context = {
+        'form': form
+    }
+
+    return render(request, 'pages/terms/create.html', context)
+
+@login_required
+def viewTerm(request, id):
+    term = get_object_or_404(Term, id=id, delete_status=False)
+
+    context = {
+        'term': term
+    }
+
+    return render(request, 'pages/terms/show.html', context)
+
+@login_required
+def editTerm(request, id):
+    try:
+        term = get_object_or_404(Term, id=id, delete_status=False)
+        
+        if request.method == 'POST':
+            form = TermForm(request.POST, instance=term)
+            if form.is_valid():
+                term = form.save(commit=False)
+                term.updated_by = request.user
+                term.save()
+                messages.success(request, 'Term updated successfully.')
+                return redirect('home:viewTerm', id=term.id)
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
+                logger.warning(f"Form validation errors while updating term {id}: {form.errors}")
+        else:
+            form = TermForm(instance=term)
+    
+    except ValidationError as e:
+        messages.error(request, f'Validation error: {e}')
+        logger.error(f"Validation error while updating term {id}: {e}")
+    
+    except Term.DoesNotExist:
+        messages.error(request, 'The requested term does not exist.')
+        logger.error(f"Term with ID {id} does not exist.")
+        return redirect('home:getTerms')
+    
+    except Exception as e:
+        messages.error(request, 'An unexpected error occurred. Please try again later.')
+        logger.error(f"Unexpected error while editing term {id}: {e}")
+    
+    context = {
+        'form': form,
+        'term': term
+    }
+
+    return render(request, 'pages/terms/edit.html', context)
+
+@login_required
+def deleteTerm(request, id):
+    term = get_object_or_404(Term, id=id, delete_status=False)
+    term.delete_status = True
+    term.updated_by = request.user
+    term.save()
+    messages.success(request, 'Term deleted successfully.')
+    return redirect('home:getTerms')
+
 @login_required
 def getTeachers(request):
     teachers = Teacher.objects.filter(delete_status=False).order_by('-created_at')
@@ -293,28 +407,6 @@ def deleteTeacher(request, employee_id):
     teacher.save()
     messages.success(request, 'Teacher deleted successfully.')
     return redirect('home:getTeachers')
-
-@login_required
-def getAcademicYears(request):
-    academic_years = AcademicYear.objects.filter(delete_status=False).order_by('-created_at')
-    today = timezone.now().date()
-
-    for year in academic_years:
-        if year.start_date and year.end_date:
-            if today < year.start_date:
-                year.status = "Not Started"
-            elif year.start_date <= today <= year.end_date:
-                year.status = "Ongoing"
-            else:
-                year.status = "Finished"
-        else:
-            year.status = "Dates not set"
-
-    context = {
-        'academic_years': academic_years
-    }
-
-    return render(request, 'pages/academicYears/index.html', context)
 
 @login_required
 def getStudents(request):
@@ -450,98 +542,6 @@ def deleteStudent(request, slug):
     student.save()
     messages.success(request, 'Student deleted successfully.')
     return redirect('home:getStudents')
-
-def addTerm(request):
-    try:
-        if request.method == 'POST':
-            form = TermForm(request.POST)
-            if form.is_valid():
-                term = form.save(commit=False)
-                term.created_by = request.user
-                term.save()
-                messages.success(request, 'Term added successfully.')
-                return redirect('home:getTerms')
-            else:
-                for field, errors in form.errors.items():
-                    for error in errors:
-                        messages.error(request, f"{field}: {error}")
-                logger.warning(f"Form validation errors while adding a new term: {form.errors}")
-        else:
-            form = TermForm()
-    
-    except ValidationError as e:
-        messages.error(request, f'Validation error: {e}')
-        logger.error(f"Validation error while adding a new term: {e}")
-    
-    except Exception as e:
-        messages.error(request, 'An unexpected error occurred. Please try again later.')
-        logger.error(f"Unexpected error while adding a new term: {e}")
-    
-    context = {
-        'form': form
-    }
-
-    return render(request, 'pages/terms/create.html', context)
-
-@login_required
-def viewTerm(request, id):
-    term = get_object_or_404(Term, id=id, delete_status=False)
-
-    context = {
-        'term': term
-    }
-
-    return render(request, 'pages/terms/show.html', context)
-
-@login_required
-def editTerm(request, id):
-    try:
-        term = get_object_or_404(Term, id=id, delete_status=False)
-        
-        if request.method == 'POST':
-            form = TermForm(request.POST, instance=term)
-            if form.is_valid():
-                term = form.save(commit=False)
-                term.updated_by = request.user
-                term.save()
-                messages.success(request, 'Term updated successfully.')
-                return redirect('home:viewTerm', id=term.id)
-            else:
-                for field, errors in form.errors.items():
-                    for error in errors:
-                        messages.error(request, f"{field}: {error}")
-                logger.warning(f"Form validation errors while updating term {id}: {form.errors}")
-        else:
-            form = TermForm(instance=term)
-    
-    except ValidationError as e:
-        messages.error(request, f'Validation error: {e}')
-        logger.error(f"Validation error while updating term {id}: {e}")
-    
-    except Term.DoesNotExist:
-        messages.error(request, 'The requested term does not exist.')
-        logger.error(f"Term with ID {id} does not exist.")
-        return redirect('home:getTerms')
-    
-    except Exception as e:
-        messages.error(request, 'An unexpected error occurred. Please try again later.')
-        logger.error(f"Unexpected error while editing term {id}: {e}")
-    
-    context = {
-        'form': form,
-        'term': term
-    }
-
-    return render(request, 'pages/terms/edit.html', context)
-
-@login_required
-def deleteTerm(request, id):
-    term = get_object_or_404(Term, id=id, delete_status=False)
-    term.delete_status = True
-    term.updated_by = request.user
-    term.save()
-    messages.success(request, 'Term deleted successfully.')
-    return redirect('home:getTerms')
 
 @login_required
 def getClasses(request):
