@@ -586,7 +586,8 @@ def deleteStudent(request, slug):
 
 @login_required
 def getClasses(request):
-    classes = Class.objects.filter(delete_status=False)
+    academic_year_id = request.session.get('academic_year_id')
+    classes = Class.objects.filter(academic_year_id=academic_year_id, delete_status=False)
 
     context = {
         'classes': classes
@@ -652,8 +653,7 @@ def addClass(request, academic_year_id):
             logger.error(f"Unexpected error while adding class in academic year {academic_year_id}: {e}")
     else:
         form = ClassForm(initial={'academic_year': academic_year})
-    
-    # Fetch students not assigned to any class in the current academic year
+
     students = Student.objects.filter(
         delete_status=False,
         current_status='Active'
@@ -665,9 +665,9 @@ def addClass(request, academic_year_id):
             )
         )
     ).order_by('-created_at')
-    
+
     headTeachers = Teacher.objects.filter(delete_status=False).order_by('-created_at')
-    
+
     context = {
         'form': form,
         'students': students,
@@ -679,7 +679,8 @@ def addClass(request, academic_year_id):
 
 @login_required
 def viewClass(request, id):
-    class_obj = get_object_or_404(Class, id=id, delete_status=False)
+    academic_year_id = request.session.get('academic_year_id')
+    class_obj = get_object_or_404(Class, id=id, academic_year_id=academic_year_id, delete_status=False)
     active_students = class_obj.students.filter(delete_status=False, current_status='Active')
 
     context = {
@@ -691,8 +692,9 @@ def viewClass(request, id):
 
 @login_required
 def editClass(request, id):
-    class_obj = get_object_or_404(Class, id=id, delete_status=False)
-    
+    academic_year_id = request.session.get('academic_year_id')  # Get selected academic year from session
+    class_obj = get_object_or_404(Class, id=id, academic_year_id=academic_year_id, delete_status=False)
+
     if request.method == 'POST':
         form = ClassForm(request.POST, instance=class_obj)
         try:
@@ -739,8 +741,7 @@ def editClass(request, id):
             logger.error(f"Unexpected error while updating class {id}: {e}")
     else:
         form = ClassForm(instance=class_obj)
-    
-    # Fetch students not assigned to any class in the current academic year (excluding this class)
+
     students = Student.objects.filter(
         delete_status=False,
         current_status='Active'
@@ -752,12 +753,11 @@ def editClass(request, id):
             ).exclude(pk=class_obj.pk)
         )
     )
-    
-    # Add currently assigned students to the queryset
+
     students = students.union(class_obj.students.all())
     
     headTeachers = Teacher.objects.filter(delete_status=False).order_by('-created_at')
-    
+
     context = {
         'form': form,
         'class': class_obj,
@@ -765,12 +765,13 @@ def editClass(request, id):
         'headTeachers': headTeachers,
         'academic_year': class_obj.academic_year,
     }
-    
+
     return render(request, 'pages/classes/edit.html', context)
 
 @login_required
 def deleteClass(request, id):
-    class_obj = get_object_or_404(Class, id=id, delete_status=False)
+    academic_year_id = request.session.get('academic_year_id')
+    class_obj = get_object_or_404(Class, id=id, academic_year_id=academic_year_id, delete_status=False)
     class_obj.delete_status = True
     class_obj.updated_by = request.user
     class_obj.save()
