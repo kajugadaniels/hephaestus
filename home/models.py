@@ -385,14 +385,31 @@ class ClassSubject(models.Model):
         self.full_clean()
         super().save(*args, **kwargs)
 
-class TeacherAttendance(models.Model):
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+class StudentSchoolFees(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE)
-    date = models.DateField()
-    status = models.BooleanField()
+    term = models.ForeignKey(Term, on_delete=models.CASCADE)
+    class_group = models.ForeignKey(Class, on_delete=models.CASCADE)
+    amount_due = models.DecimalField(max_digits=10, decimal_places=2)
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    due_date = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def clean(self):
+        if self.amount_due < 0:
+            raise ValidationError('Amount due cannot be negative.')
+        if self.amount_paid < 0:
+            raise ValidationError('Amount paid cannot be negative.')
+        if self.amount_paid > self.amount_due:
+            raise ValidationError('Amount paid cannot exceed the amount due.')
 
-    class Meta:
-        unique_together = ('teacher', 'academic_year', 'date')
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.student} - {self.academic_year} - {self.term} - {self.class_group}"
 
 class Attendance(models.Model):
     ATTENDANCE_CHOICES = [
